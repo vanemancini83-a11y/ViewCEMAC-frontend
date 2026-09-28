@@ -2,77 +2,170 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0F2B22" />
-  <meta name="description" content="Politique de confidentialité de TradingGab — Le regard sur les marchés CEMAC." />
-  <title>Politique de confidentialité — TradingGab</title>
+  <title>Politique de confidentialité — ViewCEMAC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
   <style>
-    .legal-wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
-    .legal-wrap h1 { font-family: var(--font-display); font-size: 30px; font-weight: 600; color: var(--paper); margin: 0 0 4px; }
-    .legal-wrap .updated { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-    .legal-wrap h2 { font-family: var(--font-display); font-size: 19px; font-weight: 600; color: var(--paper); margin: 28px 0 8px; }
-    .legal-wrap p, .legal-wrap li { font-size: 15px; line-height: 1.65; color: var(--paper); opacity: 0.92; }
-    .legal-wrap ul { padding-left: 18px; }
-    .legal-wrap a { color: var(--gold); }
-    .back-link { display: inline-block; margin-bottom: 18px; font-size: 13px; color: var(--muted); text-decoration: none; }
-    .back-link:hover { color: var(--gold); }
+    :root {
+      --green-dark: #0F2B22;
+      --green-card: #16352B;
+      --green-border: #2A4A3E;
+      --gold: #E8C468;
+      --text: #E9F2ED;
+      --text-dim: #9DB8AD;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--green-dark);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      line-height: 1.65;
+      padding: 24px 18px 60px;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    header { text-align: center; padding: 24px 0 32px; }
+    .brand-name {
+      font-family: 'Fraunces', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .brand-slogan {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 6px;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.6rem;
+      margin: 8px 0 4px;
+    }
+    .updated { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 28px; }
+    h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.15rem;
+      color: var(--gold);
+      margin: 30px 0 10px;
+    }
+    p, li { font-size: 0.95rem; margin-bottom: 10px; }
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 6px; }
+    a { color: var(--gold); }
+    .card {
+      background: var(--green-card);
+      border: 1px solid var(--green-border);
+      border-radius: 14px;
+      padding: 18px;
+      margin: 14px 0;
+    }
+    .back {
+      display: inline-block;
+      margin-top: 36px;
+      padding: 12px 24px;
+      background: var(--gold);
+      color: var(--green-dark);
+      font-weight: 600;
+      border-radius: 999px;
+      text-decoration: none;
+    }
+    footer { text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 40px; }
   </style>
 </head>
 <body>
-  <main class="legal-wrap">
-    <a class="back-link" href="/">← Retour à TradingGab</a>
-    <h1>Politique de confidentialité</h1>
-    <p class="updated">Dernière mise à jour : 5 septembre 2026</p>
+  <div class="container">
+    <header>
+      <span class="brand-name">◆ ViewCEMAC</span>
+      <span class="brand-slogan">Le regard sur les marchés CEMAC</span>
+    </header>
 
-    <p>TradingGab (« l'Application », « nous ») est une application de suivi des marchés financiers de la zone CEMAC (BVMAC, forex, matières premières). Cette politique décrit comment nous traitons vos données personnelles lorsque vous utilisez l'Application disponible sur tradinggab.vercel.app et sur le Google Play Store.</p>
+    <h1>Politique de confidentialité</h1>
+    <p class="updated">Dernière mise à jour : 28 septembre 2026</p>
+
+    <p>ViewCEMAC (« l'Application ») respecte votre vie privée. Cette politique explique quelles données nous collectons, pourquoi, et comment elles sont protégées. En utilisant l'Application, vous acceptez les pratiques décrites ci-dessous.</p>
 
     <h2>1. Données que nous collectons</h2>
     <ul>
-      <li><strong>Numéro de téléphone</strong> : utilisé uniquement pour créer votre compte et vous authentifier (connexion par téléphone).</li>
-      <li><strong>Statut Premium</strong> : un indicateur (premium / non-premium) et la date d'expiration de votre abonnement, stockés de manière sécurisée dans votre profil utilisateur.</li>
-      <li><strong>Préférences d'affichage</strong> : ex. marché sélectionné, stockées localement sur votre appareil (localStorage) et non sur nos serveurs.</li>
+      <li><strong>Numéro de téléphone</strong> : utilisé comme identifiant de connexion.</li>
+      <li><strong>Mot de passe</strong> : stocké de manière chiffrée (hachage) — nous ne pouvons jamais le lire en clair.</li>
+      <li><strong>Statut d'abonnement</strong> (gratuit ou Premium, date d'expiration).</li>
+      <li><strong>Données d'utilisation anonymes</strong> : marchés consultés, aucune donnée personnelle n'est associée.</li>
     </ul>
-    <p>Nous ne collectons <strong>pas</strong> votre nom, prénom, e-mail, position géographique, identifiants d'appareil, ni données de navigation à des fins publicitaires.</p>
+    <p>Nous ne collectons <strong>pas</strong> : votre position précise, vos contacts, vos photos, ni l'historique de vos appareils.</p>
 
-    <h2>2. Code de vérification (OTP)</h2>
-    <p>Lorsque la vérification par SMS est activée, un code à usage unique est envoyé à votre numéro de téléphone via Twilio (notre prestataire d'envoi de SMS) pour confirmer votre identité. Le numéro est utilisé uniquement pour l'authentification et n'est pas utilisé à des fins marketing.</p>
-
-    <h2>3. Paiements</h2>
-    <p>Les paiements de l'abonnement Premium sont traités par <strong>CinetPay</strong>, prestataire de paiement tiers certifié. TradingGab ne stocke, ne voit et ne traite jamais vos données de carte bancaire. La transaction s'effectue sur l'interface sécurisée de CinetPay.</p>
-
-    <h2>4. Hébergement et sous-traitants</h2>
+    <h2>2. Finalités</h2>
     <ul>
-      <li><strong>Supabase</strong> : gestion de l'authentification et du profil utilisateur (serveurs de l'Union européenne).</li>
-      <li><strong>Render</strong> : hébergement du backend (États-Unis).</li>
-      <li><strong>Vercel</strong> : hébergement du frontend (réseau mondial).</li>
-      <li><strong>Twilio</strong> : envoi des codes OTP par SMS (lorsque la vérification est activée).</li>
-      <li><strong>CinetPay</strong> : traitement des paiements Premium.</li>
+      <li>Créer et sécuriser votre compte ;</li>
+      <li>Gérer votre abonnement Premium (activation, expiration) ;</li>
+      <li>Afficher les cotations des marchés ;</li>
+      <li>Améliorer la fiabilité du service (surveillance technique de disponibilité).</li>
     </ul>
 
-    <h2>5. Utilisation des données</h2>
-    <p>Vos données servent uniquement à : (i) créer et sécuriser votre compte, (ii) gérer votre abonnement Premium, (iii) vous fournir le service demandé. Nous ne vendons et ne louons jamais vos données à des tiers.</p>
+    <h2>3. Sous-traitants techniques</h2>
+    <div class="card">
+      <p>Vos données sont hébergées par des prestataires réputés, agissant pour notre compte :</p>
+      <ul>
+        <li><strong>Supabase</strong> (États-Unis / Union européenne) — authentification et base de données ;</li>
+        <li><strong>Render</strong> (États-Unis) — hébergement de l'API ;</li>
+        <li><strong>Vercel</strong> (États-Unis) — hébergement de l'application web ;</li>
+        <li><strong>Mansa Markets</strong> — fourniture des cotations BVMAC, forex et matières premières (données de marché publiques, sans donnée personnelle) ;</li>
+        <li><strong>UptimeRobot</strong> — supervision de disponibilité (aucune donnée personnelle transmise) ;</li>
+        <li><strong>CinetPay</strong> (activé prochainement) — traitement des paiements. <em>Nous ne stockons jamais vos coordonnées bancaires ou secrets de paiement.</em></li>
+      </ul>
+    </div>
 
-    <h2>6. Conservation</h2>
-    <p>Vos données sont conservées tant que votre compte est actif. Vous pouvez demander la suppression de votre compte et de vos données à tout moment (voir contact ci-dessous).</p>
+    <h2>4. Paiements</h2>
+    <p>Les paiements sont traités par des prestataires agréés (CinetPay, ou Mobile Money directement selon la période). Nous ne recevons et ne conservons que la <strong>confirmation</strong> du paiement (montant, identifiant de transaction, date) afin d'activer votre abonnement.</p>
 
-    <h2>7. Vos droits</h2>
-    <p>Conformément au RGPD et aux lois applicables en zone CEMAC, vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles. Pour exercer ces droits, contactez-nous à l'adresse ci-dessous.</p>
+    <h2>5. Sécurité</h2>
+    <ul>
+      <li>Chiffrement de toutes les communications (HTTPS/TLS) ;</li>
+      <li>Mots de passe hachés par Supabase (jamais en clair) ;</li>
+      <li>Accès à la base de données restreint par des clés secrètes serveur (jamais exposées dans l'application) ;</li>
+      <li>Jetons de session à durée limitée ;</li>
+      <li>Protection contre les requêtes abusives (limitation et vérification des origines).</li>
+    </ul>
 
-    <h2>8. Sécurité</h2>
-    <p>Nous mettons en œuvre des mesures techniques (chiffrement en transit HTTPS, authentification par token, stockage sécurisé des métadonnées) pour protéger vos données. Aucune méthode de transmission n'est totalement sûre, mais nous appliquons les standards raisonnables du secteur.</p>
+    <h2>6. Vos droits</h2>
+    <p>Conformément aux lois applicables en matière de protection des données personnelles dans votre pays de résidence (notamment au sein de la CEMAC), vous disposez des droits suivants :</p>
+    <ul>
+      <li><strong>Accès</strong> : savoir quelles données nous détenons sur vous ;</li>
+      <li><strong>Rectification</strong> : corriger vos informations ;</li>
+      <li><strong>Suppression</strong> : demander l'effacement définitif de votre compte et de vos données ;</li>
+      <li><strong>Opposition</strong> : vous désinscrire à tout moment.</li>
+    </ul>
+    <div class="card">
+      <p><strong>Pour exercer ces droits</strong>, contactez-nous à l'adresse ci-dessous. Les demandes sont traitées sous 30 jours maximum.</p>
+    </div>
 
-    <h2>9. Enfants</h2>
-    <p>L'Application n'est pas destinée aux personnes de moins de 18 ans et ne collecte pas sciemment de données les concernant.</p>
+    <h2>7. Cookies et stockage local</h2>
+    <p>L'Application utilise le <strong>stockage local de votre navigateur</strong> (localStorage) uniquement pour mémoriser votre session (jeton de connexion) et vos préférences d'affichage. Aucun cookie publicitaire ni dispositif de suivi tiers n'est utilisé.</p>
 
-    <h2>10. Modifications</h2>
-    <p>Nous pouvons mettre à jour cette politique. La date de dernière mise à jour figure en haut de cette page.</p>
+    <h2>8. Données de marché</h2>
+    <p>Les cotations affichées (BVMAC, forex, matières premières) sont des données de marché obtenues via <strong>Mansa Markets</strong> et fournies « telles quelles ». Elles sont fournies à titre informatif et ne constituent en aucun cas un conseil en investissement.</p>
+
+    <h2>9. Mineurs</h2>
+    <p>L'Application n'est pas destinée aux personnes de moins de 18 ans. Nous ne collectons pas sciemment de données concernant des mineurs ; si vous êtes parent et avez connaissance d'un compte créé par votre enfant, contactez-nous pour sa suppression.</p>
+
+    <h2>10. Modification de cette politique</h2>
+    <p>Nous pouvons mettre à jour cette politique (notamment lors de l'activation de nouveaux services comme le paiement en ligne). La date de mise à jour figure en tête de page. Les changements substantiels seront annoncés dans l'Application.</p>
 
     <h2>11. Contact</h2>
-    <p>Pour toute question relative à vos données : <a href="mailto:vanemancini83@gmail.com">vanemancini83@gmail.com</a></p>
-  </main>
+    <div class="card">
+      <p><strong>Responsable du traitement</strong><br />
+      ViewCEMAC<br />
+      Email : <a href="mailto:vanemancini83@gmail.com">vanemancini83@gmail.com</a><br />
+      Téléphone / WhatsApp : 066 59 83 14</p>
+    </div>
+
+    <a class="back" href="/">← Retour à l'application</a>
+
+    <footer>ViewCEMAC — Zone CEMAC · BVMAC, forex, matières premières</footer>
+  </div>
 </body>
 </html>
