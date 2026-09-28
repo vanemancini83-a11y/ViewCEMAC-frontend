@@ -379,6 +379,10 @@ function setupPremiumButton() {
   const btn = document.querySelector(".premium-cta");
   if (!btn) return;
 
+  // ✅ Activation manuelle (en attendant CinetPay/RCCM) :
+  // Numéros Mobile Money du propriétaire (Gabon).
+  const PAIEMENT_MANUEL_NUMERO = "066 59 83 14 (Airtel Money) ou 074 52 28 22 (Moov Money)";
+
   btn.addEventListener("click", async () => {
     const token = localStorage.getItem("viewcemac_token");
 
@@ -414,9 +418,18 @@ function setupPremiumButton() {
       window.location.href = paymentUrl;
     } catch (err) {
       console.error(err);
-      alert("Le paiement n'a pas pu être lancé. Réessaie dans un instant.");
+      // ✅ Si CinetPay n'est pas encore activé : instructions Mobile Money
       btn.disabled = false;
       btn.textContent = "Passer Premium — 2 000 FCFA / mois";
+      alert(
+        "Paiement en ligne bientôt disponible.\n\n" +
+        "Pour t'abonner maintenant :\n" +
+        "1. Envoie 2 000 FCFA au :\n" +
+        "   • 066 59 83 14 (Airtel Money)\n" +
+        "   • 074 52 28 22 (Moov Money)\n" +
+        "2. Envoie ton numéro ViewCEMAC par SMS ou WhatsApp au même numéro\n" +
+        "3. Activation sous quelques minutes"
+      );
     }
   });
 }
