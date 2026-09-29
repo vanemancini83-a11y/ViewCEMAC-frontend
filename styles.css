@@ -39,7 +39,7 @@ body {
 .brand-row { display: flex; align-items: center; gap: 8px; }
 .brand-mark { color: var(--gold); font-size: 18px; }
 .brand-name { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.15rem; color: var(--text); }
-.brand-slogan { display: block; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-top: 2px; }
+.brand-slogan { display: block; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-top: 2px; white-space: nowrap; }
 .header-right { display: flex; align-items: center; gap: 10px; }
 .freshness { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--dim); }
 .freshness .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--up); animation: blink 2s infinite; }
@@ -76,8 +76,11 @@ body {
 
 /* ---------- Onglets ---------- */
 .tabs {
-  display: flex; gap: 8px; padding: 14px 16px 6px;
+  display: flex; gap: 8px; padding: 14px 16px 8px;
   overflow-x: auto; scrollbar-width: none;
+  position: sticky; top: 62px; z-index: 40;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
@@ -98,8 +101,10 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   background: var(--panel); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 13px 14px;
+  transition: transform 0.12s ease, border-color 0.12s ease;
 }
-.m-row__left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.m-row:active { transform: scale(0.985); border-color: var(--gold); }
+.m-row__left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 .m-row__avatar {
   width: 40px; height: 40px; border-radius: 12px; flex: 0 0 auto;
   background: var(--panel-2); border: 1px solid var(--border);
@@ -109,9 +114,9 @@ body {
 }
 .m-row__names { display: flex; flex-direction: column; min-width: 0; }
 .m-row__ticker { font-weight: 600; font-size: 0.95rem; }
-.m-row__name { font-size: 0.74rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-.m-row__right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-.m-row__price { font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; font-weight: 600; }
+.m-row__name { font-size: 0.74rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 38vw; }
+.m-row__right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: 0 0 auto; margin-left: 12px; }
+.m-row__price { font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; font-weight: 600; white-space: nowrap; }
 .m-row__chg {
   font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600;
   padding: 2px 8px; border-radius: 6px;
@@ -156,6 +161,8 @@ body {
   padding: 14px; border-radius: 14px;
 }
 .premium-cta:disabled { background: var(--panel-2); color: var(--up); border: 1px solid var(--up); cursor: default; }
+.premium-card.is-active { border-color: var(--up); }
+.premium-card.is-active .premium-title { color: var(--up); }
 
 /* ---------- Divers ---------- */
 .empty-message { color: var(--dim); }
