@@ -254,7 +254,16 @@ function setupTabs() {
   }));
 }
 
+function setupPasswordLink() {
+  const btn = document.getElementById("password-link");
+  if (!btn) return;
+  const logged = !!localStorage.getItem("viewcemac_token");
+  btn.style.display = logged ? "" : "none";
+  btn.addEventListener("click", () => { window.location.href = "compte.html"; });
+}
+
 function setupAccountLink() {
+  setupPasswordLink();
   const btn = document.getElementById("account-link");
   if (!btn) return;
   btn.textContent = localStorage.getItem("viewcemac_token") ? "Déconnexion" : "Se connecter";
