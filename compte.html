@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0C1A15" />
+  <title>ViewCEMAC — Changer le mot de passe</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/viewcemac-icon-192.png" />
+  <link rel="icon" href="icons/viewcemac-icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-body">
+  <main class="auth-main">
+    <div class="auth-brand">
+      <div class="brand-row" style="justify-content:center">
+        <span class="brand-mark" aria-hidden="true">◆</span>
+        <span class="brand-name">ViewCEMAC</span>
+      </div>
+      <span class="brand-slogan">Sécurité du compte</span>
+    </div>
+
+    <div class="auth-card">
+      <p class="auth-subtitle">Change ton mot de passe. Tu seras reconnecté automatiquement.</p>
+
+      <form id="pwd-form" class="auth-form">
+        <label class="auth-label" for="ancien">Mot de passe actuel</label>
+        <input class="auth-input" type="password" id="ancien" name="ancien"
+               placeholder="••••••••" autocomplete="current-password" required />
+
+        <label class="auth-label" for="nouveau">Nouveau mot de passe</label>
+        <input class="auth-input" type="password" id="nouveau" name="nouveau"
+               placeholder="••••••••" autocomplete="new-password" minlength="8" required />
+
+        <label class="auth-label" for="confirmation">Confirme le nouveau mot de passe</label>
+        <input class="auth-input" type="password" id="confirmation" name="confirmation"
+               placeholder="••••••••" autocomplete="new-password" minlength="8" required />
+
+        <p class="auth-hint">Au moins 8 caractères.</p>
+
+        <div class="auth-error" id="pwd-error" role="alert"></div>
+
+        <button type="submit" class="auth-submit" id="pwd-submit">Changer le mot de passe</button>
+      </form>
+
+      <p style="text-align:center;margin-top:16px">
+        <a href="/" style="color:var(--dim);font-size:0.85rem;text-decoration:none">← Retour à l'application</a>
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = "https://tradinggab-backend-2.onrender.com";
+    const errorBox = document.getElementById("pwd-error");
+    const form = document.getElementById("pwd-form");
+    const btn = document.getElementById("pwd-submit");
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = "block";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorBox.style.display = "none";
+
+      const token = localStorage.getItem("viewcemac_token");
+      if (!token) { window.location.href = "auth.html"; return; }
+
+      const ancien = document.getElementById("ancien").value.trim();
+      const nouveau = document.getElementById("nouveau").value.trim();
+      const confirmation = document.getElementById("confirmation").value.trim();
+
+      if (nouveau !== confirmation) { showError("La confirmation ne correspond pas au nouveau mot de passe."); return; }
+      if (nouveau.length < 8) { showError("Au moins 8 caractères."); return; }
+
+      btn.disabled = true;
+      btn.textContent = "Modification…";
+
+      try {
+        const res = await fetch(`${API_URL}/api/compte/mot-de-passe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ ancien, nouveau }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur");
+
+        // Succès : on nettoie la session et on renvoie vers la connexion
+        localStorage.removeItem("viewcemac_token");
+        localStorage.removeItem("viewcemac_user_id");
+        localStorage.removeItem("viewcemac_is_premium");
+        alert("Mot de passe modifié ✅ Reconnecte-toi avec le nouveau.");
+        window.location.href = "auth.html";
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Changer le mot de passe";
+      }
+    });
+  </script>
+</body>
+</html>
