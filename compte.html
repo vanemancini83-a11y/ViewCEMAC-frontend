@@ -53,6 +53,29 @@
   </main>
 
   <script>
+    // ✅ Bouton œil (afficher/masquer) sur chaque champ mot de passe
+    document.querySelectorAll('input[type="password"]').forEach((input) => {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.innerHTML = "👁️";
+      toggle.setAttribute("aria-label", "Afficher le mot de passe");
+      toggle.style.cssText =
+        "position:absolute;right:12px;top:50%;transform:translateY(-50%);" +
+        "background:none;border:none;cursor:pointer;font-size:18px;padding:4px;";
+      wrapper.appendChild(toggle);
+
+      toggle.addEventListener("click", () => {
+        const visible = input.type === "password";
+        input.type = visible ? "text" : "password";
+        toggle.innerHTML = visible ? "🙈" : "👁️";
+      });
+    });
+
     const API_URL = "https://tradinggab-backend-2.onrender.com";
     const errorBox = document.getElementById("pwd-error");
     const form = document.getElementById("pwd-form");
