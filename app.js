@@ -245,12 +245,22 @@ function refreshPremiumCta(isPremium) {
   const card = document.querySelector(".premium-card");
   const btn = document.querySelector(".premium-cta");
   if (!card || !btn) return;
+  const title = card.querySelector(".premium-title");
+  const price = card.querySelector(".premium-price");
+  const copy = card.querySelector(".premium-copy");
   if (isPremium) {
+    // ✅ Abonné : on masque le prix, on félicite
+    card.classList.add("is-active");
+    if (title) title.textContent = "Premium actif 🎉";
+    if (price) price.style.display = "none";
+    if (copy) copy.textContent = "Merci ! Vous avez accès à toutes les valeurs, au forex complet et à toutes les matières premières.";
     btn.textContent = "Abonnement actif ✓";
     btn.disabled = true;
-    const copy = card.querySelector(".premium-copy");
-    if (copy) copy.textContent = "Merci ! Vous avez accès à tout, sans limite.";
   } else {
+    card.classList.remove("is-active");
+    if (title) title.textContent = "Passe en Premium";
+    if (price) price.style.display = "";
+    if (copy) copy.textContent = "Toutes les valeurs BVMAC, le forex complet et toutes les matières premières, sans limite.";
     btn.textContent = "Passer Premium — 2 000 FCFA / mois";
     btn.disabled = false;
   }
