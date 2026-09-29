@@ -60,9 +60,20 @@ function adaptForex(raw) {
   return { ticker: raw.pair, name: raw.pair, price: raw.rate,
     priceDisplay: raw.rate.toLocaleString("fr-FR", { maximumFractionDigits: 4 }), change_pct: null };
 }
+// ✅ Unités raccourcies façon app de trading (évite les débordements)
+const UNIT_SHORT = {
+  "USD per metric ton": "$/t",
+  "USD per tonne": "$/t",
+  "USD per barrel": "$/baril",
+  "US cents per lb": "¢/lb",
+  "USD per troy ounce": "$/oz",
+  "USD per bushel": "$/boisseau",
+};
+function shortUnit(u) { return UNIT_SHORT[u] || u; }
+
 function adaptCommodity(raw) {
   return { ticker: raw.symbol, name: raw.name, price: raw.price,
-    priceDisplay: `${raw.price.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${raw.unit}`,
+    priceDisplay: `${raw.price.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${shortUnit(raw.unit)}`,
     change_pct: raw.change_pct ?? null, note: raw.africa_note };
 }
 
