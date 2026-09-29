@@ -72,10 +72,19 @@ const UNIT_SHORT = {
   "USD per tonne": "$/t",
   "USD per barrel": "$/baril",
   "US cents per lb": "¢/lb",
+  "US cents per pound": "¢/lb",
   "USD per troy ounce": "$/oz",
+  "USD per troy oz": "$/oz",
   "USD per bushel": "$/boisseau",
 };
-function shortUnit(u) { return UNIT_SHORT[u] || u; }
+// ✅ Sécurité : tout format "USD per xxx" ou "US cents per xxx" non listé
+// est raccourci automatiquement pour éviter tout débordement.
+function shortUnit(u) {
+  if (UNIT_SHORT[u]) return UNIT_SHORT[u];
+  if (/^USD per (.+)$/i.test(u)) return "$/" + RegExp.$1.split(" ")[0];
+  if (/^US cents per (.+)$/i.test(u)) return "¢/" + RegExp.$1.split(" ")[0];
+  return u;
+}
 
 function adaptCommodity(raw) {
   return { ticker: raw.symbol, name: raw.name, price: raw.price,
