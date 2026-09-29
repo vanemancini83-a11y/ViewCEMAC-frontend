@@ -1,4 +1,4 @@
-const CACHE_NAME = "viewcemac-v2";
+const CACHE_NAME = "viewcemac-v3";
 const CORE_ASSETS = [
   "/", "/index.html", "/styles.css", "/app.js", "/manifest.json",
   "/auth.html", "/auth.js", "/privacy.html",
