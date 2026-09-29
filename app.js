@@ -56,6 +56,13 @@ function formatChange(pct) {
 const RELEVANT_FOREX_PAIRS = ["USD/XAF", "USD/EUR", "USD/GBP", "USD/CNY"];
 const RELEVANT_COMMODITIES = ["BRENT", "COCOA", "COFFEE", "PALM_OIL", "RUBBER", "GOLD"];
 
+function adaptCrypto(raw) {
+  return { ticker: raw.ticker, name: raw.ticker === "BTC" ? "Bitcoin" : raw.ticker === "ETH" ? "Ethereum" : raw.ticker === "BNB" ? "BNB" : "Solana",
+    price: raw.priceUSD,
+    priceDisplay: "$ " + raw.priceUSD.toLocaleString("fr-FR", { maximumFractionDigits: 0 }),
+    change_pct: raw.change_pct ?? null };
+}
+
 const FOREX_NAMES = {
   "USD/XAF": "Dollar / Franc CFA",
   "USD/EUR": "Dollar / Euro",
@@ -93,8 +100,7 @@ function adaptCommodity(raw) {
 }
 
 async function fetchMarket(market) {
-  if (market === "crypto") return { ...EMPTY_MARKET, isPremium: false, total: 0 };
-  const endpoints = { bvmac: "/api/marches/bvmac", forex: "/api/marches/forex", matieres: "/api/marches/matieres" };
+  const endpoints = { bvmac: "/api/marches/bvmac", forex: "/api/marches/forex", matieres: "/api/marches/matieres", crypto: "/api/marches/crypto" };
   const token = localStorage.getItem("viewcemac_token");
   try {
     const res = await fetch(`${BACKEND_BASE_URL}${endpoints[market]}`, {
@@ -104,6 +110,10 @@ async function fetchMarket(market) {
     const result = await res.json();
     const isPremium = !!result.isPremium;
     const total = result.total ?? 0;
+    if (market === "crypto") {
+      const all = result.data || [];
+      return { success: true, data: all.map(adaptCrypto), isPremium, total };
+    }
     if (market === "forex") {
       // ✅ Orde pertinent : USD/XAF (la paire CEMAC) en premier
       const filtered = (result.data || [])
@@ -210,6 +220,10 @@ function renderList(items, market, meta = {}) {
       <span class="locked-cta-action">Débloquer — 2 000 FCFA / mois →</span>
     </button>`;
   }
+  if (market === "crypto") {
+    html += `<div class="m-note" style="margin:-6px 0 0;border-radius:var(--radius);border:1px dashed var(--border)">Les cryptomonnaies sont volatiles et ne sont pas régulées en zone CEMAC — informations uniquement, pas un conseil d'investissement.</div>`;
+  }
+
   list.innerHTML = html;
 
   const cta = list.querySelector(".locked-cta");
