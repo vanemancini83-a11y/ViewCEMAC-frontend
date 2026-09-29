@@ -56,8 +56,14 @@ function formatChange(pct) {
 const RELEVANT_FOREX_PAIRS = ["USD/XAF", "USD/EUR", "USD/GBP", "USD/CNY"];
 const RELEVANT_COMMODITIES = ["BRENT", "COCOA", "COFFEE", "PALM_OIL", "RUBBER", "GOLD"];
 
+const FOREX_NAMES = {
+  "USD/XAF": "Dollar / Franc CFA",
+  "USD/EUR": "Dollar / Euro",
+  "USD/GBP": "Dollar / Livre sterling",
+  "USD/CNY": "Dollar / Yuan",
+};
 function adaptForex(raw) {
-  return { ticker: raw.pair, name: raw.pair, price: raw.rate,
+  return { ticker: raw.pair, name: FOREX_NAMES[raw.pair] || raw.pair, price: raw.rate,
     priceDisplay: raw.rate.toLocaleString("fr-FR", { maximumFractionDigits: 4 }), change_pct: null };
 }
 // ✅ Unités raccourcies façon app de trading (évite les débordements)
@@ -90,7 +96,10 @@ async function fetchMarket(market) {
     const isPremium = !!result.isPremium;
     const total = result.total ?? 0;
     if (market === "forex") {
-      const filtered = (result.data || []).filter((r) => RELEVANT_FOREX_PAIRS.includes(r.pair));
+      // ✅ Orde pertinent : USD/XAF (la paire CEMAC) en premier
+      const filtered = (result.data || [])
+        .filter((r) => RELEVANT_FOREX_PAIRS.includes(r.pair))
+        .sort((a, b) => RELEVANT_FOREX_PAIRS.indexOf(a.pair) - RELEVANT_FOREX_PAIRS.indexOf(b.pair));
       return { success: true, data: filtered.map(adaptForex), isPremium, total };
     }
     if (market === "matieres") {
