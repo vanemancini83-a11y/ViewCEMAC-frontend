@@ -7,6 +7,7 @@ window.addEventListener("error", function (e) {
 
 const BACKEND_BASE_URL = "https://tradinggab-backend-2.onrender.com";
 const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+const FETCH_TIMEOUT_MS = 12000; // ✅ 12 s max d'attente du backend avant bascule sur les données de secours
 
 const SAMPLE_BVMAC = {
   success: true,
@@ -35,7 +36,16 @@ const SAMPLE_MATIERES = {
     { symbol: "GOLD", name: "Or", price: 2340.00, unit: "$/once", change_pct: 0.8, africa_note: "Valeur refuge en période d'inflation." },
   ],
 };
-const EMPTY_MARKET = { success: true, data: [] };
+// ✅ Fallback crypto : évite l'écran vide quand le backend est indisponible
+const SAMPLE_CRYPTO = {
+  success: true,
+  data: [
+    { ticker: "BTC", priceUSD: 64000, change_pct: 1.2 },
+    { ticker: "ETH", priceUSD: 3400, change_pct: -0.8 },
+    { ticker: "BNB", priceUSD: 590, change_pct: 0.4 },
+    { ticker: "SOL", priceUSD: 148, change_pct: 2.1 },
+  ],
+};
 
 const state = { market: "bvmac", bvmac: null, isPremium: false };
 let currentRequestId = 0;
@@ -102,12 +112,17 @@ function adaptCommodity(raw) {
 async function fetchMarket(market) {
   const endpoints = { bvmac: "/api/marches/bvmac", forex: "/api/marches/forex", matieres: "/api/marches/matieres", crypto: "/api/marches/crypto" };
   const token = localStorage.getItem("viewcemac_token");
+  // ✅ Timeout : évite d'attendre indéfiniment un backend en veille/planté
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
     const res = await fetch(`${BACKEND_BASE_URL}${endpoints[market]}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
+      signal: controller.signal,
     });
     if (!res.ok) throw new Error("Réponse backend non OK");
     const result = await res.json();
+    clearTimeout(timeoutId);
     const isPremium = !!result.isPremium;
     const total = result.total ?? 0;
     if (market === "crypto") {
@@ -115,7 +130,7 @@ async function fetchMarket(market) {
       return { success: true, data: all.map(adaptCrypto), isPremium, total };
     }
     if (market === "forex") {
-      // ✅ Orde pertinent : USD/XAF (la paire CEMAC) en premier
+      // ✅ Ordre pertinent : USD/XAF (la paire CEMAC) en premier
       const filtered = (result.data || [])
         .filter((r) => RELEVANT_FOREX_PAIRS.includes(r.pair))
         .sort((a, b) => RELEVANT_FOREX_PAIRS.indexOf(a.pair) - RELEVANT_FOREX_PAIRS.indexOf(b.pair));
@@ -127,8 +142,12 @@ async function fetchMarket(market) {
     }
     return { success: true, data: result.data || [], isPremium, total };
   } catch (err) {
+    clearTimeout(timeoutId);
     console.warn(`Backend indisponible pour ${market}`, err);
-    const fallback = market === "bvmac" ? SAMPLE_BVMAC : market === "forex" ? SAMPLE_FOREX : market === "matieres" ? SAMPLE_MATIERES : EMPTY_MARKET;
+    const fallback = market === "bvmac" ? SAMPLE_BVMAC
+      : market === "forex" ? SAMPLE_FOREX
+      : market === "matieres" ? SAMPLE_MATIERES
+      : SAMPLE_CRYPTO; // ✅ crypto : données de secours au lieu d'une liste vide
     return { ...fallback, isPremium: false, total: fallback.data.length, fromFallback: true };
   }
 }
