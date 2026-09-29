@@ -1,48 +1,24 @@
-// ✅ CORRECTION : bump de version pour forcer la mise à jour chez les utilisateurs
-const CACHE_NAME = "viewcemac-v1";
+const CACHE_NAME = "viewcemac-v2";
 const CORE_ASSETS = [
-  "/",
-  "/index.html",
-  "/styles.css",
-  "/app.js",
-  "/manifest.json",
-  // ✅ CORRECTION : la page de connexion doit fonctionner hors-ligne
-  "/auth.html",
-  "/auth.js",
-  "/privacy.html",
-  "/icons/viewcemac-icon-192.png",
-  "/icons/viewcemac-icon-512.png",
+  "/", "/index.html", "/styles.css", "/app.js", "/manifest.json",
+  "/auth.html", "/auth.js", "/privacy.html",
+  "/icons/viewcemac-icon-192.png", "/icons/viewcemac-icon-512.png",
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
-  );
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(CORE_ASSETS)));
   self.skipWaiting();
 });
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
-  );
+self.addEventListener("activate", (e) => {
+  e.waitUntil(caches.keys().then((keys) =>
+    Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))));
   self.clients.claim();
 });
-
-// Stratégie : réseau d'abord pour les appels API (données fraîches),
-// cache d'abord pour les fichiers statiques de l'app (chargement rapide,
-// utile en zone de connexion instable).
-self.addEventListener("fetch", (event) => {
-  const url = new URL(event.request.url);
-  const isApiCall = url.pathname.startsWith("/api/");
-
-  if (isApiCall) {
-    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+self.addEventListener("fetch", (e) => {
+  const url = new URL(e.request.url);
+  if (url.pathname.startsWith("/api/")) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     return;
   }
-
-  event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
-  );
+  e.respondWith(caches.match(e.request).then((c) => c || fetch(e.request)));
 });
