@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0F2B22" />
-  <meta name="description" content="ViewCEMAC — Le regard sur les marchés CEMAC. Suivi des marchés BVMAC, crypto, forex et matières premières pour la zone CEMAC." />
+  <meta name="theme-color" content="#0C1A15" />
+  <meta name="description" content="ViewCEMAC — Cotations BVMAC en direct, forex USD/XAF et matières premières pour la zone CEMAC." />
 
   <title>ViewCEMAC — Le regard sur les marchés CEMAC</title>
 
   <link rel="manifest" href="manifest.json" />
-  <!-- ✅ CORRECTION : les fichiers réels s'appellent viewcemac-icon-*.png -->
   <link rel="apple-touch-icon" href="icons/viewcemac-icon-192.png" />
   <link rel="icon" href="icons/viewcemac-icon-192.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -25,9 +24,11 @@
     <div class="brand">
       <div class="brand-row">
         <span class="brand-mark" aria-hidden="true">◆</span>
-        <span class="brand-name">ViewCEMAC</span>
+        <div>
+          <span class="brand-name">ViewCEMAC</span>
+          <span class="brand-slogan">Marchés CEMAC en direct</span>
+        </div>
       </div>
-      <span class="brand-slogan">Le regard sur les marchés CEMAC</span>
     </div>
     <div class="header-right">
       <div class="freshness" id="freshness">
@@ -38,48 +39,39 @@
     </div>
   </header>
 
-  <section class="pulse-strip" aria-label="Le pouls CEMAC — défilement des valeurs">
-    <div class="pulse-track" id="pulse-track">
-      <!-- rempli par app.js -->
-    </div>
+  <section class="pulse-strip" aria-label="Le pouls CEMAC">
+    <div class="pulse-track" id="pulse-track"></div>
   </section>
 
   <main>
-
     <section class="hero" id="hero">
-      <p class="hero-eyebrow">BVMAC · Zone CEMAC</p>
-      <h1 class="hero-name" id="hero-name">BGFI Holding Corporation</h1>
+      <p class="hero-eyebrow">BVMAC · À la une</p>
+      <h1 class="hero-name" id="hero-name">—</h1>
       <div class="hero-figures">
-        <span class="hero-price" id="hero-price">— FCFA</span>
-        <span class="hero-change" id="hero-change">—</span>
+        <span class="hero-price" id="hero-price">—</span>
+        <span class="hero-change flat" id="hero-change">—</span>
       </div>
       <p class="hero-note">La plus grosse capitalisation de la BVMAC</p>
     </section>
 
-    <nav class="tabs" aria-label="Catégories de marchés">
+    <nav class="tabs" aria-label="Marchés">
       <button class="tab is-active" data-market="bvmac">BVMAC</button>
-      <button class="tab" data-market="crypto">Crypto</button>
       <button class="tab" data-market="forex">Forex</button>
       <button class="tab" data-market="matieres">Matières</button>
     </nav>
 
-    <section class="list" id="list" aria-live="polite">
-      <!-- rempli par app.js -->
-    </section>
+    <section class="list" id="list" aria-live="polite"></section>
 
     <section class="premium-card">
-      <div>
-        <p class="premium-title">Passe en Premium</p>
-        <p class="premium-copy">Accède à toutes les valeurs BVMAC, au forex complet et à toutes les matières premières sans limite.</p>
+      <p class="premium-title">Passe en Premium</p>
+      <p class="premium-copy">Toutes les valeurs BVMAC, le forex complet et toutes les matières premières, sans limite.</p>
       <p class="premium-price">2 000 FCFA <span>/ mois</span></p>
-      </div>
       <button class="premium-cta">Passer Premium</button>
     </section>
-
   </main>
 
   <footer class="app-footer">
-    <p>Données BVMAC via Mansa API · rafraîchies toutes les 30 minutes</p>
+    <p>Données via Mansa Markets · rafraîchies toutes les 30 minutes</p>
   </footer>
 
   <script src="app.js"></script>
