@@ -19,7 +19,7 @@ const SAMPLE_BVMAC = {
   success: true,
   data: [
     { ticker: "BANGE", name: "BANGE", price: 223255, change: 0, change_pct: 0, volume: 0 },
-    { ticker: "BGFIHC", name: "BGFI HC", price: 90001, change: 0, change_pct: 0, volume: 0 },
+    { ticker: "BGFIHC", name: "BGFI HC", price: 90000, change: 0, change_pct: 0, volume: 0 },
     { ticker: "REGIONALE", name: "REGIONALE", price: 39000, change: 0, change_pct: 0, volume: 0 },
     { ticker: "SAFACAM", name: "SAFACAM", price: 35100, change: 0, change_pct: 0, volume: 0 },
     { ticker: "SCGRE", name: "SCG-Ré", price: 20000, change: 0, change_pct: 0, volume: 0 },
@@ -148,7 +148,9 @@ async function fetchMarket(market) {
       const filtered = (result.data || []).filter((r) => RELEVANT_COMMODITIES.includes(r.symbol));
       return { success: true, data: filtered.map(adaptCommodity), isPremium, total };
     }
-    return { success: true, data: result.data || [], isPremium, total };
+    // ✅ bvmac : on conserve le timestamp réel du scraping (premier élément)
+    const scrapedAt = (result.data && result.data[0] && result.data[0].scraped_at) || null;
+    return { success: true, data: result.data || [], isPremium, total, scrapedAt };
   } catch (err) {
     clearTimeout(timeoutId);
     console.warn(`Backend indisponible pour ${market}`, err);
@@ -189,8 +191,14 @@ function renderPulse(items) {
   });
 }
 
+// ✅ #9 : plus de ticker en dur. L'API ne fournit pas la capitalisation
+// (pas de nombre d'actions), donc le hero met à la une la valeur au cours
+// le plus élevé — ce qui correspond au libellé « la plus cotée » du HTML.
 function renderHero(items) {
-  const featured = items.find((i) => i.ticker === "BGFIHC") || items[0];
+  const featured = items.reduce(
+    (top, i) => (top === null || i.price > top.price ? i : top),
+    null
+  );
   const nameEl = document.getElementById("hero-name");
   const priceEl = document.getElementById("hero-price");
   const changeEl = document.getElementById("hero-change");
@@ -319,18 +327,23 @@ function renderList(items, market, meta = {}) {
   }
 }
 
-// ✅ COHÉRENCE : n'affiche « Mis à jour à … » que pour de vraies données.
-// En mode fallback (démo), on dit explicitement qu'on est hors ligne —
-// la bannière offline et ce texte ne se contredisent plus.
-function renderFreshness(fromFallback) {
+// ✅ #8 : affiche l'heure RÉELLE des données (scraped_at fourni par l'API),
+// jamais l'heure du téléphone. En mode fallback, on le dit honnêtement.
+function renderFreshness(fromFallback, scrapedAt) {
   const el = document.getElementById("freshness-text");
   if (!el) return;
   if (fromFallback) {
     el.textContent = "Hors ligne — données de démo";
     return;
   }
-  const time = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-  el.textContent = `Mis à jour à ${time}`;
+  if (scrapedAt) {
+    const d = new Date(scrapedAt);
+    if (!isNaN(d.getTime())) {
+      el.textContent = `Données de ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+      return;
+    }
+  }
+  el.textContent = "Données en direct";
 }
 
 async function loadMarket(market) {
@@ -352,7 +365,7 @@ async function loadMarket(market) {
     renderPulse(items);
   }
   renderList(items, market, result);
-  renderFreshness(!!result.fromFallback);
+  renderFreshness(!!result.fromFallback, result.scrapedAt);
 }
 
 function setupTabs() {
