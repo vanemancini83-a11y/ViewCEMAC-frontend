@@ -77,6 +77,18 @@
       <button class="tab" data-market="crypto">Crypto</button>
     </nav>
 
+    <!-- ✅ #16 : recherche + tri -->
+    <div class="toolbar" role="search">
+      <input type="search" id="search-input" placeholder="Rechercher une valeur…" aria-label="Rechercher une valeur" />
+      <select id="sort-select" aria-label="Trier les valeurs">
+        <option value="default">Tri : défaut</option>
+        <option value="name">Nom A→Z</option>
+        <option value="price-desc">Cours ↓</option>
+        <option value="price-asc">Cours ↑</option>
+        <option value="change">Variation</option>
+      </select>
+    </div>
+
     <section class="list" id="list" aria-live="polite"></section>
 
     <section class="premium-card">
