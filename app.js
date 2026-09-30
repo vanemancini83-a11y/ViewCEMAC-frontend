@@ -53,7 +53,15 @@ const SAMPLE_CRYPTO = {
   ],
 };
 
-const state = { market: "bvmac", bvmac: null, isPremium: false };
+const state = {
+  market: "bvmac",
+  bvmac: null,
+  isPremium: false,
+  items: [],   // ✅ #16 : derniers éléments chargés (avant filtre/tri)
+  total: 0,    // total côté API (pour le CTA verrouillé)
+  query: "",
+  sort: "default",
+};
 let currentRequestId = 0;
 
 function formatFCFA(value) {
@@ -223,16 +231,17 @@ function renderOfflineBanner(isOffline) {
   } else if (banner) banner.remove();
 }
 
+// ✅ #16 : vrai squelette de chargement (barres shimmer, style app de trading)
 function renderLoadingList() {
   const list = document.getElementById("list");
   if (!list) return;
-  // ✅ SÉCURITÉ : texte statique, textContent suffit
   list.textContent = "";
-  const p = document.createElement("p");
-  p.className = "empty-message";
-  p.style.cssText = "text-align:center;padding:24px;";
-  p.textContent = "Chargement des données…";
-  list.appendChild(p);
+  for (let i = 0; i < 6; i++) {
+    const skel = document.createElement("div");
+    skel.className = "skel-row";
+    skel.setAttribute("aria-hidden", "true");
+    list.appendChild(skel);
+  }
 }
 
 // ✅ SÉCURITÉ (fix XSS) : même traitement que renderPulse — le HTML est
@@ -243,13 +252,20 @@ function renderList(items, market, meta = {}) {
   list.textContent = "";
   const isPremium = !!meta.isPremium;
   const total = meta.total ?? items.length;
-  const lockedCount = isPremium ? 0 : Math.max(0, total - items.length);
+  // ✅ #16 : le CTA verrouillé est calculé sur la liste COMPLÈTE
+  // (passé dans meta.lockedCount), jamais sur la liste filtrée
+  const lockedCount = meta.lockedCount !== undefined
+    ? meta.lockedCount
+    : (isPremium ? 0 : Math.max(0, total - items.length));
 
   if (!items.length && !lockedCount) {
     const p = document.createElement("p");
     p.className = "empty-message";
     p.style.cssText = "text-align:center;padding:20px;";
-    p.textContent = "Aucune donnée disponible pour le moment.";
+    // ✅ #16 : message distinct quand c'est la recherche qui vide la liste
+    p.textContent = meta.noResults
+      ? `Aucun résultat pour « ${state.query} »`
+      : "Aucune donnée disponible pour le moment.";
     list.appendChild(p);
     return;
   }
@@ -261,6 +277,18 @@ function renderList(items, market, meta = {}) {
 
     const row = document.createElement("div");
     row.className = "m-row";
+    // ✅ #14 : la ligne est cliquable → page détail de la valeur
+    row.style.cursor = "pointer";
+    row.setAttribute("role", "link");
+    row.tabIndex = 0;
+    row.setAttribute("aria-label", `Détails de ${item.name || item.ticker}`);
+    const goDetail = () => {
+      window.location.href = `detail.html?ticker=${encodeURIComponent(item.ticker)}&market=${market}`;
+    };
+    row.addEventListener("click", goDetail);
+    row.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goDetail(); }
+    });
 
     const left = document.createElement("div");
     left.className = "m-row__left";
@@ -327,6 +355,67 @@ function renderList(items, market, meta = {}) {
   }
 }
 
+
+// ✅ #16 : filtre sur ticker + nom (insensible à la casse)
+function filterItems(items, q) {
+  const s = (q || "").trim().toLowerCase();
+  if (!s) return items;
+  return items.filter((i) => `${i.ticker} ${i.name || ""}`.toLowerCase().includes(s));
+}
+
+// ✅ #16 : tri des valeurs affichées
+function sortItems(items, mode) {
+  const arr = [...items];
+  const val = (i) => i.price ?? 0;
+  switch (mode) {
+    case "name":
+      arr.sort((a, b) => (a.name || a.ticker).localeCompare(b.name || b.ticker, "fr"));
+      break;
+    case "price-asc":
+      arr.sort((a, b) => val(a) - val(b));
+      break;
+    case "price-desc":
+      arr.sort((a, b) => val(b) - val(a));
+      break;
+    case "change":
+      arr.sort((a, b) => (b.change_pct ?? -Infinity) - (a.change_pct ?? -Infinity));
+      break;
+    default:
+      break; // ordre API
+  }
+  return arr;
+}
+
+// ✅ #16 : applique recherche + tri sur les données chargées, sans refetch
+function applyView() {
+  const full = state.items || [];
+  const filtered = sortItems(filterItems(full, state.query), state.sort);
+  renderList(filtered, state.market, {
+    isPremium: state.isPremium,
+    total: state.total,
+    lockedCount: state.isPremium ? 0 : Math.max(0, state.total - full.length),
+    noResults: full.length > 0 && filtered.length === 0,
+  });
+}
+
+// ✅ #16 : branche la barre de recherche et le tri
+function setupToolbar() {
+  const search = document.getElementById("search-input");
+  const sort = document.getElementById("sort-select");
+  if (search) {
+    search.addEventListener("input", () => {
+      state.query = search.value;
+      applyView();
+    });
+  }
+  if (sort) {
+    sort.addEventListener("change", () => {
+      state.sort = sort.value;
+      applyView();
+    });
+  }
+}
+
 // ✅ #8 : affiche l'heure RÉELLE des données (scraped_at fourni par l'API),
 // jamais l'heure du téléphone. En mode fallback, on le dit honnêtement.
 function renderFreshness(fromFallback, scrapedAt) {
@@ -364,7 +453,9 @@ async function loadMarket(market) {
     renderHero(items);
     renderPulse(items);
   }
-  renderList(items, market, result);
+  state.items = items;
+  state.total = result.total ?? items.length;
+  applyView();
   renderFreshness(!!result.fromFallback, result.scrapedAt);
 }
 
@@ -538,6 +629,7 @@ async function checkPaymentReturn() {
 
 function init() {
   setupTabs();
+  setupToolbar();
   setupPremiumButton();
   setupAccountLink();
   loadProfile();
