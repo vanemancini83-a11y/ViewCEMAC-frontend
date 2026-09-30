@@ -177,3 +177,122 @@ async function loadSparkline(ticker, market) {
     /* backend injoignable : pas de graphique, pas de message */
   }
 }
+
+
+// ================= ✅ #17 : Notifications push + alertes =================
+const getToken = () => localStorage.getItem("viewcemac_token");
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+}
+
+async function activerNotifications() {
+  const btn = document.getElementById("btn-notif");
+  const msg = document.getElementById("alerte-msg");
+  if (!getToken()) { window.location.href = "auth.html"; return; }
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    msg.textContent = "❌ Ce navigateur ne supporte pas les notifications push.";
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "Activation…";
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") {
+      msg.textContent = "❌ Permission refusée. Autorise les notifications pour viewcemac.vercel.app dans les réglages de Chrome.";
+      btn.disabled = false;
+      btn.textContent = "🔔 Activer les notifications";
+      return;
+    }
+    const { publicKey } = await (await fetch(`${BACKEND}/api/notifications/vapid-public-key`)).json();
+    if (!publicKey) throw new Error("clé VAPID indisponible");
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+    const res = await fetch(`${BACKEND}/api/notifications/subscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+      body: JSON.stringify({ subscription: sub.toJSON() }),
+    });
+    if (!res.ok) throw new Error("enregistrement échoué");
+    btn.textContent = "🔔 Notifications activées ✓";
+    document.getElementById("alerte-form").style.display = "";
+    msg.textContent = "";
+  } catch (e) {
+    msg.textContent = "❌ Activation impossible : " + e.message;
+    btn.disabled = false;
+    btn.textContent = "🔔 Activer les notifications";
+  }
+}
+
+async function creerAlerte() {
+  const msg = document.getElementById("alerte-msg");
+  const prix = Number(document.getElementById("alerte-prix").value);
+  const direction = document.getElementById("alerte-direction").value;
+  if (!Number.isFinite(prix) || prix <= 0) {
+    msg.textContent = "❌ Entre un prix cible valide.";
+    return;
+  }
+  try {
+    const res = await fetch(`${BACKEND}/api/alertes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+      body: JSON.stringify({ marche: market, ticker: (params.get("ticker") || "").toUpperCase(), prix_cible: prix, direction }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "création échouée");
+    msg.textContent = "✅ Alerte créée ! Tu seras notifié quand le prix la franchira.";
+    document.getElementById("alerte-prix").value = "";
+    chargerAlertes();
+  } catch (e) {
+    msg.textContent = "❌ " + e.message;
+  }
+}
+
+async function chargerAlertes() {
+  const box = document.getElementById("alerte-liste");
+  if (!box || !getToken()) return;
+  try {
+    const res = await fetch(`${BACKEND}/api/alertes`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (!res.ok) return;
+    const { alertes } = await res.json();
+    const code = (params.get("ticker") || "").toUpperCase();
+    const miennes = (alertes || []).filter(
+      (a) => a.marche === market && a.ticker === code
+    );
+    box.textContent = "";
+    miennes.forEach((a) => {
+      const row = document.createElement("div");
+      row.style.cssText =
+        "display:flex;justify-content:space-between;align-items:center;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:0.82rem";
+      const label = document.createElement("span");
+      label.textContent = `${a.direction} de ${Number(a.prix_cible).toLocaleString("fr-FR")}${a.active ? "" : " — déclenchée ✓"}`;
+      if (!a.active) label.style.color = "var(--dim)";
+      const btn = document.createElement("button");
+      btn.textContent = "✕";
+      btn.style.cssText = "background:none;border:none;color:var(--down);cursor:pointer;font-size:1rem";
+      btn.addEventListener("click", async () => {
+        await fetch(`${BACKEND}/api/alertes/${a.id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        chargerAlertes();
+      });
+      row.append(label, btn);
+      box.appendChild(row);
+    });
+  } catch { /* silencieux */ }
+}
+
+// Branchement
+document.getElementById("btn-notif")?.addEventListener("click", activerNotifications);
+document.getElementById("alerte-creer")?.addEventListener("click", creerAlerte);
+// Si déjà connecté, on pré-remplit l'état
+if (getToken()) chargerAlertes();
