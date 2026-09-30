@@ -1,8 +1,14 @@
+// ✅ SÉCURITÉ : le gestionnaire d'erreur n'affiche plus rien en production.
+// Il ne s'active qu'en local (localhost) ou avec ?debug dans l'URL,
+// et utilise textContent (jamais innerHTML) pour le message.
 window.addEventListener("error", function (e) {
-  document.body.insertAdjacentHTML(
-    "afterbegin",
-    `<pre style="background:#F6465D;color:#fff;padding:12px;white-space:pre-wrap;font-size:14px;z-index:9999;position:relative;">ERREUR JS : ${e.message}\n${e.filename}:${e.lineno}</pre>`
-  );
+  const isDev = ["localhost", "127.0.0.1"].includes(location.hostname)
+    || new URLSearchParams(location.search).has("debug");
+  if (!isDev) return;
+  const pre = document.createElement("pre");
+  pre.style.cssText = "background:#F6465D;color:#fff;padding:12px;white-space:pre-wrap;font-size:14px;z-index:9999;position:relative;";
+  pre.textContent = `ERREUR JS : ${e.message}\n${e.filename}:${e.lineno}`;
+  document.body.insertAdjacentElement("afterbegin", pre);
 });
 
 const BACKEND_BASE_URL = "https://tradinggab-backend-2.onrender.com";
@@ -98,8 +104,10 @@ const UNIT_SHORT = {
 // est raccourci automatiquement pour éviter tout débordement.
 function shortUnit(u) {
   if (UNIT_SHORT[u]) return UNIT_SHORT[u];
-  if (/^USD per (.+)$/i.test(u)) return "$/" + RegExp.$1.split(" ")[0];
-  if (/^US cents per (.+)$/i.test(u)) return "¢/" + RegExp.$1.split(" ")[0];
+  const mUsd = /^USD per (.+)$/i.exec(u);
+  if (mUsd) return "$/" + mUsd[1].split(" ")[0];
+  const mCents = /^US cents per (.+)$/i.exec(u);
+  if (mCents) return "¢/" + mCents[1].split(" ")[0];
   return u;
 }
 
@@ -152,17 +160,33 @@ async function fetchMarket(market) {
   }
 }
 
+// ✅ SÉCURITÉ (fix XSS) : construction du DOM via createElement + textContent.
+// Aucune donnée API n'est plus injectée dans innerHTML : un ticker ou un nom
+// contenant du HTML/JS est affiché comme du texte, jamais exécuté.
 function renderPulse(items) {
   const track = document.getElementById("pulse-track");
   if (!track) return;
-  if (!items.length) { track.innerHTML = ""; return; }
+  track.textContent = "";
+  if (!items.length) return;
   const doubled = [...items, ...items];
-  track.innerHTML = doubled.map((item) => `
-    <span class="pulse-item">
-      <span class="ticker">${item.ticker}</span>
-      <span>${formatFCFA(item.price)}</span>
-      <span class="${changeClass(item.change_pct)}">${formatChange(item.change_pct)}</span>
-    </span>`).join("");
+  doubled.forEach((item) => {
+    const span = document.createElement("span");
+    span.className = "pulse-item";
+
+    const ticker = document.createElement("span");
+    ticker.className = "ticker";
+    ticker.textContent = item.ticker;
+
+    const price = document.createElement("span");
+    price.textContent = formatFCFA(item.price);
+
+    const chg = document.createElement("span");
+    chg.className = changeClass(item.change_pct);
+    chg.textContent = formatChange(item.change_pct);
+
+    span.append(ticker, price, chg);
+    track.appendChild(span);
+  });
 }
 
 function renderHero(items) {
@@ -194,64 +218,117 @@ function renderOfflineBanner(isOffline) {
 function renderLoadingList() {
   const list = document.getElementById("list");
   if (!list) return;
-  list.innerHTML = `<p class="empty-message" style="text-align:center;padding:24px;">Chargement des données…</p>`;
+  // ✅ SÉCURITÉ : texte statique, textContent suffit
+  list.textContent = "";
+  const p = document.createElement("p");
+  p.className = "empty-message";
+  p.style.cssText = "text-align:center;padding:24px;";
+  p.textContent = "Chargement des données…";
+  list.appendChild(p);
 }
 
+// ✅ SÉCURITÉ (fix XSS) : même traitement que renderPulse — le HTML est
+// construit en DOM, toutes les données API passent par textContent.
 function renderList(items, market, meta = {}) {
   const list = document.getElementById("list");
   if (!list) return;
+  list.textContent = "";
   const isPremium = !!meta.isPremium;
   const total = meta.total ?? items.length;
   const lockedCount = isPremium ? 0 : Math.max(0, total - items.length);
 
   if (!items.length && !lockedCount) {
-    list.innerHTML = `<p class="empty-message" style="text-align:center;padding:20px;">Aucune donnée disponible pour le moment.</p>`;
+    const p = document.createElement("p");
+    p.className = "empty-message";
+    p.style.cssText = "text-align:center;padding:20px;";
+    p.textContent = "Aucune donnée disponible pour le moment.";
+    list.appendChild(p);
     return;
   }
 
-  let html = items.map((item) => {
+  items.forEach((item) => {
     const initials = item.ticker.slice(0, 2).toUpperCase();
     const cls = changeClass(item.change_pct);
     const priceText = item.priceDisplay || formatFCFA(item.price);
-    return `
-    <div class="m-row">
-      <div class="m-row__left">
-        <div class="m-row__avatar">${initials}</div>
-        <div class="m-row__names">
-          <span class="m-row__ticker">${item.ticker}</span>
-          <span class="m-row__name">${item.name}</span>
-        </div>
-      </div>
-      <div class="m-row__right">
-        <span class="m-row__price">${priceText}</span>
-        <span class="m-row__chg m-row__chg--${cls}">${formatChange(item.change_pct)}</span>
-      </div>
-    </div>
-    ${item.note ? `<div class="m-note">${item.note}</div>` : ""}`;
-  }).join("");
+
+    const row = document.createElement("div");
+    row.className = "m-row";
+
+    const left = document.createElement("div");
+    left.className = "m-row__left";
+    const avatar = document.createElement("div");
+    avatar.className = "m-row__avatar";
+    avatar.textContent = initials;
+    const names = document.createElement("div");
+    names.className = "m-row__names";
+    const ticker = document.createElement("span");
+    ticker.className = "m-row__ticker";
+    ticker.textContent = item.ticker;
+    const name = document.createElement("span");
+    name.className = "m-row__name";
+    name.textContent = item.name;
+    names.append(ticker, name);
+    left.append(avatar, names);
+
+    const right = document.createElement("div");
+    right.className = "m-row__right";
+    const price = document.createElement("span");
+    price.className = "m-row__price";
+    price.textContent = priceText;
+    const chg = document.createElement("span");
+    chg.className = `m-row__chg m-row__chg--${cls}`;
+    chg.textContent = formatChange(item.change_pct);
+    right.append(price, chg);
+
+    row.append(left, right);
+    list.appendChild(row);
+
+    if (item.note) {
+      const note = document.createElement("div");
+      note.className = "m-note";
+      note.textContent = item.note; // ✅ jamais innerHTML
+      list.appendChild(note);
+    }
+  });
 
   if (lockedCount > 0) {
     const label = market === "forex" ? "paire" : market === "matieres" ? "matière" : "valeur";
     const plural = lockedCount > 1 ? "s" : "";
-    html += `
-    <button class="locked-cta" type="button">
-      <span class="locked-cta-count">+${lockedCount} ${label}${plural} de plus</span>
-      <span class="locked-cta-action">Débloquer — 2 000 FCFA / mois →</span>
-    </button>`;
+    const cta = document.createElement("button");
+    cta.className = "locked-cta";
+    cta.type = "button";
+
+    const count = document.createElement("span");
+    count.className = "locked-cta-count";
+    count.textContent = `+${lockedCount} ${label}${plural} de plus`;
+    const action = document.createElement("span");
+    action.className = "locked-cta-action";
+    action.textContent = "Débloquer — 2 000 FCFA / mois →";
+    cta.append(count, action);
+
+    cta.addEventListener("click", () => document.querySelector(".premium-cta")?.click());
+    list.appendChild(cta);
   }
+
   if (market === "crypto") {
-    html += `<div class="m-note" style="margin:-6px 0 0;border-radius:var(--radius);border:1px dashed var(--border)">Les cryptomonnaies sont volatiles et ne sont pas régulées en zone CEMAC — informations uniquement, pas un conseil d'investissement.</div>`;
+    const disc = document.createElement("div");
+    disc.className = "m-note";
+    disc.style.cssText = "margin:-6px 0 0;border-radius:var(--radius);border:1px dashed var(--border)";
+    disc.textContent = "Les cryptomonnaies sont volatiles et ne sont pas régulées en zone CEMAC — informations uniquement, pas un conseil d'investissement.";
+    list.appendChild(disc);
   }
-
-  list.innerHTML = html;
-
-  const cta = list.querySelector(".locked-cta");
-  if (cta) cta.addEventListener("click", () => document.querySelector(".premium-cta")?.click());
 }
 
-function renderFreshness() {
+// ✅ COHÉRENCE : n'affiche « Mis à jour à … » que pour de vraies données.
+// En mode fallback (démo), on dit explicitement qu'on est hors ligne —
+// la bannière offline et ce texte ne se contredisent plus.
+function renderFreshness(fromFallback) {
   const el = document.getElementById("freshness-text");
   if (!el) return;
+  if (fromFallback) {
+    el.textContent = "Hors ligne — données de démo";
+    return;
+  }
   const time = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   el.textContent = `Mis à jour à ${time}`;
 }
@@ -275,7 +352,7 @@ async function loadMarket(market) {
     renderPulse(items);
   }
   renderList(items, market, result);
-  renderFreshness();
+  renderFreshness(!!result.fromFallback);
 }
 
 function setupTabs() {
@@ -319,19 +396,21 @@ function refreshPremiumCta(isPremium) {
   const title = card.querySelector(".premium-title");
   const price = card.querySelector(".premium-price");
   const copy = card.querySelector(".premium-copy");
+  // ✅ COHÉRENCE : un seul texte, aligné sur index.html (avec crypto),
+  // et tutoiement partout comme dans auth.js / compte.html.
+  const COPY_PREMIUM = "Toutes les valeurs BVMAC, le forex complet, toutes les matières premières et le crypto complet, sans limite.";
   if (isPremium) {
-    // ✅ Abonné : on masque le prix, on félicite
     card.classList.add("is-active");
     if (title) title.textContent = "Premium actif 🎉";
     if (price) price.style.display = "none";
-    if (copy) copy.textContent = "Merci ! Vous avez accès à toutes les valeurs, au forex complet et à toutes les matières premières.";
+    if (copy) copy.textContent = "Merci ! Tu as accès à toutes les valeurs, au forex complet, aux matières premières et au crypto complet.";
     btn.textContent = "Abonnement actif ✓";
     btn.disabled = true;
   } else {
     card.classList.remove("is-active");
     if (title) title.textContent = "Passe en Premium";
     if (price) price.style.display = "";
-    if (copy) copy.textContent = "Toutes les valeurs BVMAC, le forex complet et toutes les matières premières, sans limite.";
+    if (copy) copy.textContent = COPY_PREMIUM;
     btn.textContent = "Passer Premium — 2 000 FCFA / mois";
     btn.disabled = false;
   }
