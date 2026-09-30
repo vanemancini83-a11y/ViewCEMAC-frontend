@@ -6,6 +6,17 @@
   <meta name="theme-color" content="#0C1A15" />
   <meta name="description" content="ViewCEMAC — Cotations BVMAC en direct, forex USD/XAF, matières premières et cryptomonnaies pour la zone CEMAC." />
 
+  <!-- ✅ #18 SEO / Open Graph -->
+  <meta property="og:title" content="ViewCEMAC — Le regard sur les marchés CEMAC" />
+  <meta property="og:description" content="Cotations BVMAC en direct, forex USD/XAF, matières premières et cryptomonnaies pour la zone CEMAC." />
+  <meta property="og:url" content="https://viewcemac.vercel.app" />
+  <meta property="og:image" content="https://viewcemac.vercel.app/icons/viewcemac-icon-512.png" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ViewCEMAC — Le regard sur les marchés CEMAC" />
+  <meta name="twitter:description" content="Cotations BVMAC en direct, forex USD/XAF, matières premières et cryptomonnaies pour la zone CEMAC." />
+  <meta name="twitter:image" content="https://viewcemac.vercel.app/icons/viewcemac-icon-512.png" />
+
   <title>ViewCEMAC — Le regard sur les marchés CEMAC</title>
 
   <link rel="manifest" href="manifest.json" />
@@ -52,7 +63,10 @@
         <span class="hero-price" id="hero-price">—</span>
         <span class="hero-change flat" id="hero-change">—</span>
       </div>
-      <p class="hero-note">La plus grosse capitalisation de la BVMAC</p>
+      <!-- ✅ #9 : libellé honnête — on ne peut pas calculer la capitalisation
+           sans le nombre d'actions, donc le hero met en avant la valeur au
+           cours le plus élevé (la "plus cotée"). -->
+      <p class="hero-note">La valeur la plus cotée de la BVMAC</p>
     </section>
 
     <nav class="tabs" aria-label="Marchés">
