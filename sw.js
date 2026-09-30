@@ -1,9 +1,9 @@
 // ✅ ViewCEMAC — Service Worker v10
 // À BUMPER à CHAQUE déploiement qui modifie app.js / styles.css / index.html.
-const CACHE_NAME = "viewcemac-v10";
+const CACHE_NAME = "viewcemac-v13";
 const CORE_ASSETS = [
   "/", "/index.html", "/styles.css", "/app.js", "/manifest.json",
-  "/auth.html", "/auth.js", "/compte.html", "/compte.js", "/privacy.html",
+  "/auth.html", "/auth.js", "/compte.html", "/compte.js", "/privacy.html", "/detail.html", "/detail.js",
   "/icons/viewcemac-icon-192.png", "/icons/viewcemac-icon-512.png",
 ];
 
