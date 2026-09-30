@@ -95,6 +95,32 @@ body {
   color: #0C1A15; font-weight: 700;
 }
 
+/* ✅ #16 — Barre recherche / tri */
+.toolbar { display: flex; gap: 8px; padding: 12px 12px 0; }
+.toolbar input, .toolbar select {
+  background: var(--panel); border: 1px solid var(--border); color: var(--text);
+  border-radius: 12px; padding: 10px 12px; font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.85rem; outline: none;
+}
+.toolbar input { flex: 1; min-width: 0; }
+.toolbar input::placeholder { color: var(--dim); }
+.toolbar input:focus, .toolbar select:focus { border-color: var(--gold); }
+.toolbar select { flex: 0 0 auto; cursor: pointer; }
+
+/* ✅ #16 — Squelette de chargement (shimmer) */
+.skel-row {
+  height: 66px; border-radius: var(--radius);
+  background: var(--panel); border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.skel-row::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(233, 242, 237, 0.07), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { to { transform: translateX(100%); } }
+
 /* ---------- Liste marchés (style Binance) ---------- */
 .list { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 .m-row {
