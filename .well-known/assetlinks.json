@@ -5,7 +5,7 @@
       "namespace": "android_app",
       "package_name": "com.tradinggab.app",
       "sha256_cert_fingerprints": [
-        "TODO:REMPLACER_PAR_EMPREINTE_PWABUILDER"
+        "REMPLACE_MOI_PAR_TON_EMPREINTE_SHA256"
       ]
     }
   }
