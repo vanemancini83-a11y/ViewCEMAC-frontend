@@ -100,13 +100,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (!response.ok) {
+          // ✅ OTP : numéro non vérifié → écran de saisie du code SMS
+          if (data.code === "VERIFICATION_REQUISE") {
+            window.location.href = "/verification.html?phone=" + encodeURIComponent(data.phone || phone);
+            return;
+          }
           throw new Error(data.error || data.message || "Erreur lors de l'authentification");
         }
 
-        // ✅ CORRECTION : même clé que app.js ("viewcemac_token")
-        if (data.token) {
-          localStorage.setItem(TOKEN_KEY, data.token);
+        // ✅ OTP : inscription réussie mais numéro pas encore vérifié
+        // (le backend ne renvoie le token qu'après vérification du code)
+        if (!data.token) {
+          window.location.href = "/verification.html?phone=" + encodeURIComponent(phone);
+          return;
         }
+
+        // Connexion classique : on stocke la session
+        localStorage.setItem(TOKEN_KEY, data.token);
         // Conserve l'id utilisateur si le backend le renvoie (plusieurs formats possibles)
         const userId = data.userId || data.user_id || (data.user && (data.user.id || data.user.user_id));
         if (userId) {
