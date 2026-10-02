@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F2B22" />
+  <title>ViewCEMAC — Vérification</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/viewcemac-icon-192.png" />
+  <link rel="icon" href="icons/viewcemac-icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-body">
+  <main class="auth-main">
+    <div class="auth-brand">
+      <div class="brand-row">
+        <span class="brand-mark" aria-hidden="true">◆</span>
+        <span class="brand-name">ViewCEMAC</span>
+      </div>
+      <span class="brand-slogan">Le regard sur les marchés CEMAC</span>
+    </div>
+
+    <div class="auth-card">
+      <p class="auth-subtitle">Vérifie ton numéro</p>
+      <p class="auth-hint">Un code à 6 chiffres a été envoyé au <strong id="otp-phone"></strong> par SMS.</p>
+
+      <form id="otp-form" class="auth-form">
+        <label class="auth-label" for="otp-code">Code de vérification</label>
+        <input
+          class="auth-input"
+          type="text"
+          id="otp-code"
+          name="code"
+          placeholder="123456"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          required
+        />
+        <p class="auth-hint">Le code expire après 10 minutes.</p>
+
+        <div class="auth-error" id="otp-error" role="alert"></div>
+
+        <button type="submit" class="auth-submit" id="otp-submit">Vérifier</button>
+      </form>
+
+      <p class="auth-hint" style="margin-top:12px">
+        <a href="#" id="otp-resend">Renvoyer le code</a>
+        · <a href="/auth.html">Modifier le numéro</a>
+      </p>
+    </div>
+  </main>
+  <script src="verification.js"></script>
+</body>
+</html>
