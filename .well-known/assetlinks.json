@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.tradinggab.app",
+      "package_name": "app.vercel.viewcemac.twa",
       "sha256_cert_fingerprints": [
-        "REMPLACE_MOI_PAR_TON_EMPREINTE_SHA256"
+        "REMPLACE_PAR_EMPREINTE_SHA256"
       ]
     }
   }
