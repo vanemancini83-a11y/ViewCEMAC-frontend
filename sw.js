@@ -7,7 +7,7 @@
 //    nouvelle version du SW. Ne repasse JAMAIS à v2/v1.
 // ============================================================
 
-const CACHE_NAME = 'viewcemac-v3'; // ← bump à chaque déploiement majeur
+const CACHE_NAME = 'viewcemac-v4'; // ← bump à chaque déploiement majeur
 const OFFLINE_URL = '/offline.html'; // adapte si ton fallback a un autre chemin
 
 // ------------------------------------------------------------
