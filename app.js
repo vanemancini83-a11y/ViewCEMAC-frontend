@@ -136,6 +136,13 @@ async function fetchMarket(market) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       signal: controller.signal,
     });
+        if (res.status === 401) {
+      localStorage.removeItem("viewcemac_token");
+      localStorage.removeItem("viewcemac_user_id");
+      localStorage.removeItem("viewcemac_is_premium");
+      window.location.href = "auth.html";
+      throw new Error("Session expirée");
+    }
     if (!res.ok) throw new Error("Réponse backend non OK");
     const result = await res.json();
     clearTimeout(timeoutId);
