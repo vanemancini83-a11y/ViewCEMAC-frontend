@@ -136,7 +136,7 @@ async function fetchMarket(market) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       signal: controller.signal,
     });
-        if (res.status === 401) {
+    if (res.status === 401) {
       localStorage.removeItem("viewcemac_token");
       localStorage.removeItem("viewcemac_user_id");
       localStorage.removeItem("viewcemac_is_premium");
@@ -346,7 +346,7 @@ function renderList(items, market, meta = {}) {
     count.textContent = `+${lockedCount} ${label}${plural} de plus`;
     const action = document.createElement("span");
     action.className = "locked-cta-action";
-    action.textContent = "Débloquer — 2 000 FCFA / mois →";
+    action.textContent = "Débloquer — dès 300 FCFA →";
     cta.append(count, action);
 
     cta.addEventListener("click", () => document.querySelector(".premium-cta")?.click());
@@ -522,7 +522,7 @@ function refreshPremiumCta(isPremium) {
     if (title) title.textContent = "Passe en Premium";
     if (price) price.style.display = "";
     if (copy) copy.textContent = COPY_PREMIUM;
-    btn.textContent = "Passer Premium — 2 000 FCFA / mois";
+    btn.textContent = "Passer Premium — dès 300 FCFA";
     btn.disabled = false;
   }
 }
@@ -553,43 +553,118 @@ async function loadProfile() {
 
 const PAIEMENT_MANUEL_NUMERO = "066 59 83 14 (Airtel Money) ou 074 52 28 22 (Moov Money)";
 
+// Fallback si le catalogue ne charge pas (les vrais prix viennent du backend)
+const PASSES_FALLBACK = [
+  { cle: "pass_1j", prix: 300, jours: 1, label: "Pass 1 jour" },
+  { cle: "pass_7j", prix: 1500, jours: 7, label: "Pass 7 jours" },
+  { cle: "pass_30j", prix: 3500, jours: 30, label: "Pass 30 jours" },
+  { cle: "pass_90j", prix: 9000, jours: 90, label: "Pass 90 jours" },
+];
+
+async function chargerProduits() {
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/paiement/produits`);
+    if (!res.ok) throw new Error("catalogue indisponible");
+    const { produits } = await res.json();
+    if (!produits || !produits.length) throw new Error("catalogue vide");
+    return produits;
+  } catch {
+    return PASSES_FALLBACK;
+  }
+}
+
+function fermerModalPasses(modal) {
+  if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+}
+
+async function ouvrirModalPasses() {
+  const token = localStorage.getItem("viewcemac_token");
+  if (!token) { window.location.href = "auth.html"; return; }
+  if (localStorage.getItem("viewcemac_is_premium") === "1") return;
+
+  const modal = document.createElement("div");
+  modal.style.cssText =
+    "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;";
+  const card = document.createElement("div");
+  card.style.cssText =
+    "background:#12291f;color:#f4f7f5;border:1px solid #2a463b;border-radius:14px;padding:20px;width:100%;max-width:380px;font-family:'IBM Plex Sans',sans-serif;";
+
+  const titre = document.createElement("p");
+  titre.style.cssText = "font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin:0 0 4px;";
+  titre.textContent = "Choisis ton pass Premium";
+  const sousTitre = document.createElement("p");
+  sousTitre.style.cssText = "font-size:13px;opacity:0.75;margin:0 0 16px;";
+  sousTitre.textContent = "Paiement Airtel Money / Moov Money — activation immédiate.";
+  card.append(titre, sousTitre);
+
+  const chargement = document.createElement("p");
+  chargement.style.cssText = "font-size:14px;opacity:0.8;";
+  chargement.textContent = "Chargement des offres…";
+  card.appendChild(chargement);
+
+  const fermer = document.createElement("button");
+  fermer.style.cssText =
+    "margin-top:6px;width:100%;padding:10px;border-radius:10px;border:1px solid #2a463b;background:transparent;color:#f4f7f5;font-size:14px;cursor:pointer;";
+  fermer.textContent = "Annuler";
+  fermer.addEventListener("click", () => fermerModalPasses(modal));
+  card.appendChild(fermer);
+
+  modal.addEventListener("click", (e) => { if (e.target === modal) fermerModalPasses(modal); });
+  modal.appendChild(card);
+  document.body.appendChild(modal);
+
+  const produits = await chargerProduits();
+  chargement.remove();
+
+  produits.forEach((p) => {
+    const btn = document.createElement("button");
+    btn.style.cssText =
+      "display:flex;justify-content:space-between;align-items:center;width:100%;padding:13px 14px;margin-bottom:10px;border-radius:10px;border:1px solid #2a463b;background:#0F2B22;color:#f4f7f5;font-size:15px;cursor:pointer;text-align:left;";
+    const label = document.createElement("span");
+    label.textContent = p.label;
+    const prix = document.createElement("span");
+    prix.style.cssText = "font-weight:600;color:#F5B301;";
+    prix.textContent = new Intl.NumberFormat("fr-FR").format(p.prix) + " FCFA";
+    btn.append(label, prix);
+    btn.addEventListener("click", async () => {
+      [...card.querySelectorAll("button")].forEach((b) => (b.disabled = true));
+      label.textContent = "Redirection vers le paiement…";
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}/api/paiement/initier`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ produit: p.cle }),
+        });
+        if (res.status === 401) {
+          alert("Ta session a expiré, reconnecte-toi.");
+          localStorage.removeItem("viewcemac_token");
+          window.location.href = "auth.html";
+          return;
+        }
+        if (!res.ok) throw new Error("init impossible");
+        const { paymentUrl } = await res.json();
+        window.location.href = paymentUrl;
+      } catch {
+        fermerModalPasses(modal);
+        alert(
+          "Paiement en ligne momentanément indisponible.\n\n" +
+          "Pour t'abonner maintenant :\n" +
+          "1. Envoie le montant au :\n" +
+          "   • 066 59 83 14 (Airtel Money)\n" +
+          "   • 074 52 28 22 (Moov Money)\n" +
+          "2. Envoie ton numéro ViewCEMAC par SMS ou WhatsApp au même numéro\n" +
+          "3. Activation sous quelques minutes"
+        );
+      }
+    });
+    card.insertBefore(btn, fermer);
+  });
+}
+
 function setupPremiumButton() {
   const btn = document.querySelector(".premium-cta");
   if (!btn) return;
-  btn.addEventListener("click", async () => {
-    const token = localStorage.getItem("viewcemac_token");
-    if (!token) { window.location.href = "auth.html"; return; }
-    if (localStorage.getItem("viewcemac_is_premium") === "1") return;
-
-    btn.disabled = true;
-    btn.textContent = "Redirection…";
-    try {
-      const res = await fetch(`${BACKEND_BASE_URL}/api/paiement/initier`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      });
-      if (res.status === 401) {
-        alert("Ta session a expiré, reconnecte-toi.");
-        localStorage.removeItem("viewcemac_token");
-        return;
-      }
-      if (!res.ok) throw new Error("init impossible");
-      const { paymentUrl } = await res.json();
-      window.location.href = paymentUrl;
-    } catch {
-      btn.disabled = false;
-      btn.textContent = "Passer Premium — 2 000 FCFA / mois";
-      alert(
-        "Paiement en ligne bientôt disponible.\n\n" +
-        "Pour t'abonner maintenant :\n" +
-        "1. Envoie 2 000 FCFA au :\n" +
-        "   • 066 59 83 14 (Airtel Money)\n" +
-        "   • 074 52 28 22 (Moov Money)\n" +
-        "2. Envoie ton numéro ViewCEMAC par SMS ou WhatsApp au même numéro\n" +
-        "3. Activation sous quelques minutes"
-      );
-    }
-  });
+  btn.addEventListener("click", () => ouvrirModalPasses());
 }
 
 async function checkPaymentReturn() {
