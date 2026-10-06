@@ -1,12 +1,18 @@
 {
+  "id": "/",
   "name": "ViewCEMAC",
   "short_name": "ViewCEMAC",
   "description": "ViewCEMAC — Le regard sur les marchés CEMAC. Suivi des marchés BVMAC, crypto, forex et matières premières.",
+  "lang": "fr",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0F2B22",
   "theme_color": "#0F2B22",
   "orientation": "portrait",
+  "categories": ["finance", "news", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/viewcemac-icon-192.png",
