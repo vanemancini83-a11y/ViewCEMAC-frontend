@@ -41,8 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Code invalide.");
-
       if (data.token) localStorage.setItem(TOKEN_KEY, data.token);
+            if (data.refresh_token) localStorage.setItem("viewcemac_refresh", data.refresh_token);
       const userId = data.user && data.user.id;
       if (userId) localStorage.setItem(USER_ID_KEY, String(userId));
 
