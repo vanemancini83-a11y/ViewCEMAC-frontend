@@ -124,8 +124,30 @@ function adaptCommodity(raw) {
     priceDisplay: `${raw.price.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${shortUnit(raw.unit)}`,
     change_pct: raw.change_pct ?? null, note: raw.africa_note };
 }
-
-async function fetchMarket(market) {
+// ✅ REFRESH TOKEN : renouvelle silencieusement la session quand le
+// token d'accès (1 h) expire, sans déconnecter l'utilisateur.
+async function rafraichirSession() {
+  const refresh = localStorage.getItem("viewcemac_refresh");
+  if (!refresh) return false;
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/auth/rafraichir`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refresh }),
+    });
+    if (!res.ok) {
+      localStorage.removeItem("viewcemac_refresh");
+      return false;
+    }
+    const data = await res.json();
+    localStorage.setItem("viewcemac_token", data.token);
+    localStorage.setItem("viewcemac_refresh", data.refresh_token);
+    return true;
+  } catch {
+    return false;
+  }
+}
+async function fetchMarket(market, tentative = 0) {
   const endpoints = { bvmac: "/api/marches/bvmac", forex: "/api/marches/forex", matieres: "/api/marches/matieres", crypto: "/api/marches/crypto" };
   const token = localStorage.getItem("viewcemac_token");
   // ✅ Timeout : évite d'attendre indéfiniment un backend en veille/planté
@@ -136,8 +158,14 @@ async function fetchMarket(market) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       signal: controller.signal,
     });
-    if (res.status === 401) {
+        if (res.status === 401) {
+      // ✅ 1ʳᵉ tentative : refresh silencieux puis retry automatique
+      if (tentative === 0 && (await rafraichirSession())) {
+        return fetchMarket(market, 1);
+      }
+      // Refresh impossible ou déjà tenté → déconnexion propre
       localStorage.removeItem("viewcemac_token");
+      localStorage.removeItem("viewcemac_refresh");
       localStorage.removeItem("viewcemac_user_id");
       localStorage.removeItem("viewcemac_is_premium");
       window.location.href = "auth.html";
