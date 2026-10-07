@@ -116,7 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Connexion classique : on stocke la session
-        localStorage.setItem(TOKEN_KEY, data.token);
+                if (data.session && data.session.refresh_token) {
+          localStorage.setItem("viewcemac_refresh", data.session.refresh_token);
+        }
         // Conserve l'id utilisateur si le backend le renvoie (plusieurs formats possibles)
         const userId = data.userId || data.user_id || (data.user && (data.user.id || data.user.user_id));
         if (userId) {
