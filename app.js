@@ -581,7 +581,7 @@ async function loadProfile() {
   } catch { /* silencieux */ }
 }
 
-const PAIEMENT_MANUEL_NUMERO = "066 59 83 14 (Airtel Money) ou 074 52 28 22 (Moov Money)";
+const PAIEMENT_MANUEL_NUMERO = "066 59 83 14 (Moov Money) ou 074 52 28 22 (Airtel Money)";
 
 // Fallback si le catalogue ne charge pas (les vrais prix viennent du backend)
 const PASSES_FALLBACK = [
@@ -715,8 +715,8 @@ async function ouvrirModalPasses() {
           "Paiement en ligne momentanément indisponible.\n\n" +
           "Pour t'abonner maintenant :\n" +
           "1. Envoie le montant au :\n" +
-          "   • 066 59 83 14 (Airtel Money)\n" +
-          "   • 074 52 28 22 (Moov Money)\n" +
+          "   • 066 59 83 14 (Moov Money)\n" +
+          "   • 074 52 28 22 (Airtel Money)\n" +
           "2. Envoie ton numéro ViewCEMAC par SMS ou WhatsApp au même numéro\n" +
           "3. Activation sous quelques minutes"
         );
