@@ -37,9 +37,9 @@ const SAMPLE_FOREX = {
 const SAMPLE_MATIERES = {
   success: true,
   data: [
-    { symbol: "BRENT", name: "Pétrole Brent", price: 82.50, unit: "$/baril", change_pct: 1.2, africa_note: "Impact direct sur les coûts de transport en zone CEMAC." },
-    { symbol: "COCOA", name: "Cacao", price: 9850.00, unit: "$/tonne", change_pct: -0.5, africa_note: "Le Cameroun et la Côte d'Ivoire sont des acteurs majeurs." },
-    { symbol: "GOLD", name: "Or", price: 2340.00, unit: "$/once", change_pct: 0.8, africa_note: "Valeur refuge en période d'inflation." },
+    { symbol: "BRENT", name: "Pétrole Brent", price: 82.50, unit: "USD per barrel", change_pct: 1.2, africa_note: "Impact direct sur les coûts de transport en zone CEMAC." },
+    { symbol: "COCOA", name: "Cacao", price: 9850.00, unit: "USD per tonne", change_pct: -0.5, africa_note: "Le Cameroun et la Côte d'Ivoire sont des acteurs majeurs." },
+    { symbol: "GOLD", name: "Or", price: 2340.00, unit: "USD per troy ounce", change_pct: 0.8, africa_note: "Valeur refuge en période d'inflation." },
   ],
 };
 // ✅ Fallback crypto : évite l'écran vide quand le backend est indisponible
@@ -158,14 +158,6 @@ async function fetchMarket(market, tentative = 0) {
       const all = result.data || [];
       return { success: true, data: all.map(adaptCrypto), isPremium, total };
     }
-            if (res.status === 400) {
-          const e = await res.json().catch(() => ({}));
-          alert(e.message || "Vérifie ton numéro de téléphone.");
-          [...card.querySelectorAll("button")].forEach((b) => (b.disabled = false));
-          label.textContent = p.label;
-          return;
-        }
-    
     if (market === "forex") {
       // ✅ Ordre pertinent : USD/XAF (la paire CEMAC) en premier
       const filtered = (result.data || [])
@@ -200,13 +192,19 @@ async function rafraichirSession() {
     const res = await fetch(`${BACKEND_BASE_URL}/api/auth/rafraichir`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ produit: p.cle, telephone: inputTel.value }),
+      // ✅ CORRIGÉ : on envoie le refresh token (avant : { produit: p.cle, telephone: inputTel.value }
+      // qui référençait des variables inexistantes et cassait le refresh).
+      body: JSON.stringify({ refresh_token: refresh }),
     });
     if (!res.ok) {
       localStorage.removeItem("viewcemac_refresh");
       return false;
     }
     const data = await res.json();
+    if (!data.token || !data.refresh_token) {
+      localStorage.removeItem("viewcemac_refresh");
+      return false;
+    }
     localStorage.setItem("viewcemac_token", data.token);
     localStorage.setItem("viewcemac_refresh", data.refresh_token);
     return true;
@@ -676,8 +674,20 @@ async function ouvrirModalPasses() {
         const res = await fetch(`${BACKEND_BASE_URL}/api/paiement/initier`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ produit: p.cle }),
+          // ✅ Le numéro saisi est transmis au backend (utile pour pawaPay /
+          // fallback manuel) ; le produit est identifié par sa clé.
+          body: JSON.stringify({ produit: p.cle, telephone: inputTel.value }),
         });
+        // ✅ CORRIGÉ (déplacé ici, au bon endroit) : gestion du 400 du
+        // endpoint de paiement — avant, ce bloc était par erreur dans fetchMarket()
+        // et référençait `card`/`label`/`p` hors de portée.
+        if (res.status === 400) {
+          const e = await res.json().catch(() => ({}));
+          alert(e.message || "Vérifie ton numéro de téléphone.");
+          [...card.querySelectorAll("button")].forEach((b) => (b.disabled = false));
+          label.textContent = p.label;
+          return;
+        }
         if (res.status === 401) {
           alert("Ta session a expiré, reconnecte-toi.");
           localStorage.removeItem("viewcemac_token");
@@ -727,9 +737,7 @@ async function ouvrirModalPasses() {
         alert(
           "Paiement en ligne momentanément indisponible.\n\n" +
           "Pour t'abonner maintenant :\n" +
-          "1. Envoie le montant au :\n" +
-          "   • 066 59 83 14 (Moov Money)\n" +
-          "   • 074 52 28 22 (Airtel Money)\n" +
+          "1. Envoie le montant au : " + PAIEMENT_MANUEL_NUMERO + "\n" +
           "2. Envoie ton numéro ViewCEMAC par SMS ou WhatsApp au même numéro\n" +
           "3. Activation sous quelques minutes"
         );
