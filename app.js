@@ -158,6 +158,14 @@ async function fetchMarket(market, tentative = 0) {
       const all = result.data || [];
       return { success: true, data: all.map(adaptCrypto), isPremium, total };
     }
+            if (res.status === 400) {
+          const e = await res.json().catch(() => ({}));
+          alert(e.message || "Vérifie ton numéro de téléphone.");
+          [...card.querySelectorAll("button")].forEach((b) => (b.disabled = false));
+          label.textContent = p.label;
+          return;
+        }
+    
     if (market === "forex") {
       // ✅ Ordre pertinent : USD/XAF (la paire CEMAC) en premier
       const filtered = (result.data || [])
@@ -192,7 +200,7 @@ async function rafraichirSession() {
     const res = await fetch(`${BACKEND_BASE_URL}/api/auth/rafraichir`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refresh }),
+                body: JSON.stringify({ produit: p.cle, telephone: inputTel.value }),
     });
     if (!res.ok) {
       localStorage.removeItem("viewcemac_refresh");
@@ -626,6 +634,11 @@ async function ouvrirModalPasses() {
   sousTitre.style.cssText = "font-size:13px;opacity:0.75;margin:0 0 16px;";
   sousTitre.textContent = "Paiement Airtel Money / Moov Money — activation immédiate.";
   card.append(titre, sousTitre);
+  const inputTel = document.createElement("input");
+  inputTel.type = "tel";
+  inputTel.placeholder = "Ton numéro Airtel Money (ex : 066598314)";
+  inputTel.style.cssText = "width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid #2a463b;background:#0F2B22;color:#f4f7f5;font-size:15px;";
+  card.appendChild(inputTel);
 
   const chargement = document.createElement("p");
   chargement.style.cssText = "font-size:14px;opacity:0.8;";
