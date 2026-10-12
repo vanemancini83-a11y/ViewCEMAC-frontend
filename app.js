@@ -124,29 +124,7 @@ function adaptCommodity(raw) {
     priceDisplay: `${raw.price.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} ${shortUnit(raw.unit)}`,
     change_pct: raw.change_pct ?? null, note: raw.africa_note };
 }
-// ✅ REFRESH TOKEN : renouvelle silencieusement la session quand le
-// token d'accès (1 h) expire, sans déconnecter l'utilisateur.
-async function rafraichirSession() {
-  const refresh = localStorage.getItem("viewcemac_refresh");
-  if (!refresh) return false;
-  try {
-    const res = await fetch(`${BACKEND_BASE_URL}/api/auth/rafraichir`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refresh }),
-    });
-    if (!res.ok) {
-      localStorage.removeItem("viewcemac_refresh");
-      return false;
-    }
-    const data = await res.json();
-    localStorage.setItem("viewcemac_token", data.token);
-    localStorage.setItem("viewcemac_refresh", data.refresh_token);
-    return true;
-  } catch {
-    return false;
-  }
-}
+
 async function fetchMarket(market, tentative = 0) {
   const endpoints = { bvmac: "/api/marches/bvmac", forex: "/api/marches/forex", matieres: "/api/marches/matieres", crypto: "/api/marches/crypto" };
   const token = localStorage.getItem("viewcemac_token");
@@ -158,7 +136,7 @@ async function fetchMarket(market, tentative = 0) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       signal: controller.signal,
     });
-        if (res.status === 401) {
+    if (res.status === 401) {
       // ✅ 1ʳᵉ tentative : refresh silencieux puis retry automatique
       if (tentative === 0 && (await rafraichirSession())) {
         return fetchMarket(market, 1);
@@ -202,6 +180,30 @@ async function fetchMarket(market, tentative = 0) {
       : market === "matieres" ? SAMPLE_MATIERES
       : SAMPLE_CRYPTO; // ✅ crypto : données de secours au lieu d'une liste vide
     return { ...fallback, isPremium: false, total: fallback.data.length, fromFallback: true };
+  }
+}
+
+// ✅ REFRESH TOKEN : renouvelle silencieusement la session quand le
+// token d'accès (1 h) expire, sans déconnecter l'utilisateur.
+async function rafraichirSession() {
+  const refresh = localStorage.getItem("viewcemac_refresh");
+  if (!refresh) return false;
+  try {
+    const res = await fetch(`${BACKEND_BASE_URL}/api/auth/rafraichir`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refresh }),
+    });
+    if (!res.ok) {
+      localStorage.removeItem("viewcemac_refresh");
+      return false;
+    }
+    const data = await res.json();
+    localStorage.setItem("viewcemac_token", data.token);
+    localStorage.setItem("viewcemac_refresh", data.refresh_token);
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -656,7 +658,7 @@ async function ouvrirModalPasses() {
     btn.append(label, prix);
     btn.addEventListener("click", async () => {
       [...card.querySelectorAll("button")].forEach((b) => (b.disabled = true));
-      label.textContent = "Redirection vers le paiement…";
+      label.textContent = "Connexion au paiement…";
       try {
         const res = await fetch(`${BACKEND_BASE_URL}/api/paiement/initier`, {
           method: "POST",
@@ -670,8 +672,43 @@ async function ouvrirModalPasses() {
           return;
         }
         if (!res.ok) throw new Error("init impossible");
-        const { paymentUrl } = await res.json();
-        window.location.href = paymentUrl;
+        const data = await res.json();
+        if (data.requiresPhoneApproval) {
+          // pawaPay : le client approuve avec son code PIN sur son téléphone
+          card.textContent = "";
+          const info = document.createElement("p");
+          info.style.cssText = "font-size:15px;line-height:1.5;";
+          info.textContent = "📱 Vérifie ton téléphone : une demande de paiement Airtel Money est en attente. Entre ton code PIN pour confirmer.";
+          card.appendChild(info);
+          const statutEl = document.createElement("p");
+          statutEl.style.cssText = "font-size:13px;opacity:0.85;margin-top:10px;";
+          statutEl.textContent = "Activation en cours…";
+          card.appendChild(statutEl);
+          let essais = 0;
+          const timer = setInterval(async () => {
+            essais++;
+            try {
+              const r = await fetch(`${BACKEND_BASE_URL}/api/paiement/statut/${data.transactionId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const s = await r.json();
+              if (s.statut === "confirme") {
+                clearInterval(timer);
+                statutEl.textContent = "Premium activé 🎉 Redirection…";
+                setTimeout(() => { window.location.href = "/"; }, 1500);
+              } else if (s.statut === "echoue") {
+                clearInterval(timer);
+                statutEl.textContent = "Paiement échoué. Réessaie ou contacte le support.";
+              } else if (essais >= 36) {
+                clearInterval(timer);
+                statutEl.textContent = "Activation en attente — rafraîchis dans quelques minutes.";
+              }
+            } catch { /* on réessaie au prochain cycle */ }
+          }, 5000);
+          return;
+        }
+        // Fallback : si un jour un provider renvoie une URL de redirection
+        window.location.href = data.paymentUrl;
       } catch {
         fermerModalPasses(modal);
         alert(
