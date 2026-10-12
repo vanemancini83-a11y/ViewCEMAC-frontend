@@ -636,7 +636,7 @@ async function ouvrirModalPasses() {
   card.append(titre, sousTitre);
   const inputTel = document.createElement("input");
   inputTel.type = "tel";
-  inputTel.placeholder = "Ton numéro Airtel Money (ex : 066598314)";
+  inputTel.placeholder = "Ton numéro Airtel Money (ex : 074522822)";
   inputTel.style.cssText = "width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid #2a463b;background:#0F2B22;color:#f4f7f5;font-size:15px;";
   card.appendChild(inputTel);
 
