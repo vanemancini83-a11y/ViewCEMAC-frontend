@@ -28,6 +28,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- ✅ Pages légales : styles du footer (exigés par le prestataire de paiement) -->
+  <style>
+    .legal-links {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px;
+      margin-top: 10px; font-size: 0.72rem;
+    }
+    .legal-links a { color: var(--dim); text-decoration: none; }
+    .legal-links a:hover, .legal-links a:active { color: var(--gold); }
+  </style>
 </head>
 <body>
 
@@ -99,8 +109,15 @@
     </section>
   </main>
 
+  <!-- ✅ Pages légales visibles depuis l’accueil (exigence pawaPay / conformité) -->
   <footer class="app-footer">
     <p>Données via Mansa Markets · rafraîchies toutes les 30 minutes</p>
+    <nav class="legal-links" aria-label="Informations légales">
+      <a href="/conditions.html">Conditions d’utilisation</a>
+      <a href="/privacy.html">Confidentialité</a>
+      <a href="/remboursement.html">Remboursement</a>
+      <a href="/contact.html">Contact</a>
+    </nav>
   </footer>
 
   <script src="app.js"></script>
