@@ -2,170 +2,87 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0F2B22" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0C1A15" />
+  <meta name="description" content="Politique de confidentialité — ViewCEMAC" />
   <title>Politique de confidentialité — ViewCEMAC</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
   <style>
-    :root {
-      --green-dark: #0F2B22;
-      --green-card: #16352B;
-      --green-border: #2A4A3E;
-      --gold: #E8C468;
-      --text: #E9F2ED;
-      --text-dim: #9DB8AD;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--green-dark);
-      color: var(--text);
-      font-family: 'IBM Plex Sans', sans-serif;
-      line-height: 1.65;
-      padding: 24px 18px 60px;
-    }
-    .container { max-width: 720px; margin: 0 auto; }
-    header { text-align: center; padding: 24px 0 32px; }
-    .brand-name {
-      font-family: 'Fraunces', serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--gold);
-    }
-    .brand-slogan {
-      display: block;
-      font-size: 0.8rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-top: 6px;
-    }
-    h1 {
-      font-family: 'Fraunces', serif;
-      font-size: 1.6rem;
-      margin: 8px 0 4px;
-    }
-    .updated { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 28px; }
-    h2 {
-      font-family: 'Fraunces', serif;
-      font-size: 1.15rem;
-      color: var(--gold);
-      margin: 30px 0 10px;
-    }
-    p, li { font-size: 0.95rem; margin-bottom: 10px; }
-    ul { padding-left: 20px; margin-bottom: 12px; }
-    li { margin-bottom: 6px; }
-    a { color: var(--gold); }
-    .card {
-      background: var(--green-card);
-      border: 1px solid var(--green-border);
-      border-radius: 14px;
-      padding: 18px;
-      margin: 14px 0;
-    }
-    .back {
-      display: inline-block;
-      margin-top: 36px;
-      padding: 12px 24px;
-      background: var(--gold);
-      color: var(--green-dark);
-      font-weight: 600;
-      border-radius: 999px;
-      text-decoration: none;
-    }
-    footer { text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 40px; }
+    :root { --bg:#0C1A15; --panel:#122720; --border:#1E3A30; --gold:#E8C468; --text:#E9F2ED; --dim:#8FA69B; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif; min-height:100vh; }
+    header { display:flex; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--border); position:sticky; top:0; background:rgba(12,26,21,.95); backdrop-filter:blur(8px); }
+    .back { background:#16352B; border:1px solid var(--border); color:var(--gold); font-size:.85rem; font-weight:600; padding:8px 16px; border-radius:999px; text-decoration:none; }
+    .brand { font-family:Georgia,serif; font-weight:700; }
+    main { max-width:720px; margin:0 auto; padding:26px 18px 40px; line-height:1.7; font-size:.92rem; }
+    h1 { font-size:1.45rem; color:var(--gold); margin-bottom:6px; }
+    .maj { color:var(--dim); font-size:.78rem; margin-bottom:20px; }
+    h2 { font-size:1rem; color:var(--gold); margin:24px 0 8px; }
+    p, li { margin-bottom:10px; }
+    ul, ol { padding-left:22px; margin-bottom:12px; }
+    strong { color:var(--text); }
+    a { color:var(--gold); }
+    footer { max-width:720px; margin:0 auto; padding:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:14px; font-size:.78rem; color:var(--dim); }
+    footer a { color:var(--gold); text-decoration:none; }
   </style>
+
 </head>
 <body>
-  <div class="container">
-    <header>
-      <span class="brand-name">◆ ViewCEMAC</span>
-      <span class="brand-slogan">Le regard sur les marchés CEMAC</span>
-    </header>
+  <header>
+    <a class="back" href="/">← Retour</a>
+    <span class="brand">ViewCEMAC</span>
+  </header>
 
+  <main>
     <h1>Politique de confidentialité</h1>
-    <p class="updated">Dernière mise à jour : 28 septembre 2026</p>
+    <p class="maj">Dernière mise à jour : 14 octobre 2026</p>
 
-    <p>ViewCEMAC (« l'Application ») respecte votre vie privée. Cette politique explique quelles données nous collectons, pourquoi, et comment elles sont protégées. En utilisant l'Application, vous acceptez les pratiques décrites ci-dessous.</p>
+    <p>ViewCEMAC (« le Service ») est édité par Nzahou Essongue Vane Waraine, Libreville, Gabon (<a href="mailto:vanemancini83@gmail.com">vanemancini83@gmail.com</a>). Cette politique décrit comment nous collectons, utilisons et protégeons vos données.</p>
 
     <h2>1. Données que nous collectons</h2>
     <ul>
-      <li><strong>Numéro de téléphone</strong> : utilisé comme identifiant de connexion.</li>
-      <li><strong>Mot de passe</strong> : stocké de manière chiffrée (hachage) — nous ne pouvons jamais le lire en clair.</li>
-      <li><strong>Statut d'abonnement</strong> (gratuit ou Premium, date d'expiration).</li>
-      <li><strong>Données d'utilisation anonymes</strong> : marchés consultés, aucune donnée personnelle n'est associée.</li>
+      <li><strong>Numéro de téléphone</strong> — utilisé comme identifiant de connexion et pour recevoir le code de vérification (SMS/WhatsApp). C'est la seule donnée d'identification obligatoire.</li>
+      <li><strong>Mot de passe</strong> — stocké uniquement sous forme hachée (jamais en clair).</li>
+      <li><strong>Abonnement de notification push</strong> — si vous activez les alertes de prix, un identifiant technique d'appareil est enregistré pour vous envoyer les notifications.</li>
+      <li><strong>Alertes de prix créées</strong> — valeur, seuil et direction choisis par vous.</li>
+      <li><strong>Données de paiement</strong> — gérées intégralement par notre prestataire <strong>pawaPay</strong> : nous ne voyons ni ne stockons vos codes PIN mobile money ni vos soldes. Seuls nous sont transmis le statut du paiement et l'identifiant de transaction.</li>
     </ul>
-    <p>Nous ne collectons <strong>pas</strong> : votre position précise, vos contacts, vos photos, ni l'historique de vos appareils.</p>
 
-    <h2>2. Finalités</h2>
+    <h2>2. Utilisation</h2>
     <ul>
-      <li>Créer et sécuriser votre compte ;</li>
-      <li>Gérer votre abonnement Premium (activation, expiration) ;</li>
-      <li>Afficher les cotations des marchés ;</li>
-      <li>Améliorer la fiabilité du service (surveillance technique de disponibilité).</li>
+      <li>Authentification et sécurité de votre compte ;</li>
+      <li>Fourniture du service (cotations, alertes, passes Premium) ;</li>
+      <li>Notifications que <strong>vous</strong> avez choisi d'activer.</li>
     </ul>
+    <p>Nous ne vendons ni ne louons vos données à qui que ce soit, et nous n'envoyons aucune publicité.</p>
 
-    <h2>3. Sous-traitants techniques</h2>
-    <div class="card">
-      <p>Vos données sont hébergées par des prestataires réputés, agissant pour notre compte :</p>
-      <ul>
-        <li><strong>Supabase</strong> (États-Unis / Union européenne) — authentification et base de données ;</li>
-        <li><strong>Render</strong> (États-Unis) — hébergement de l'API ;</li>
-        <li><strong>Vercel</strong> (États-Unis) — hébergement de l'application web ;</li>
-        <li><strong>Mansa Markets</strong> — fourniture des cotations BVMAC, forex et matières premières (données de marché publiques, sans donnée personnelle) ;</li>
-        <li><strong>UptimeRobot</strong> — supervision de disponibilité (aucune donnée personnelle transmise) ;</li>
-        <li><strong>CinetPay</strong> (activé prochainement) — traitement des paiements. <em>Nous ne stockons jamais vos coordonnées bancaires ou secrets de paiement.</em></li>
-      </ul>
-    </div>
-
-    <h2>4. Paiements</h2>
-    <p>Les paiements sont traités par des prestataires agréés (CinetPay, ou Mobile Money directement selon la période). Nous ne recevons et ne conservons que la <strong>confirmation</strong> du paiement (montant, identifiant de transaction, date) afin d'activer votre abonnement.</p>
-
-    <h2>5. Sécurité</h2>
+    <h2>3. Où sont hébergées vos données</h2>
     <ul>
-      <li>Chiffrement de toutes les communications (HTTPS/TLS) ;</li>
-      <li>Mots de passe hachés par Supabase (jamais en clair) ;</li>
-      <li>Accès à la base de données restreint par des clés secrètes serveur (jamais exposées dans l'application) ;</li>
-      <li>Jetons de session à durée limitée ;</li>
-      <li>Protection contre les requêtes abusives (limitation et vérification des origines).</li>
+      <li><strong>Supabase</strong> (base de données : comptes, alertes, abonnements) ;</li>
+      <li><strong>Render</strong> (serveur applicatif, Europe) ;</li>
+      <li><strong>Vercel</strong> (site web) ;</li>
+      <li><strong>pawaPay</strong> (traitement des paiements mobiles, sous sa propre politique de confidentialité).</li>
     </ul>
 
-    <h2>6. Vos droits</h2>
-    <p>Conformément aux lois applicables en matière de protection des données personnelles dans votre pays de résidence (notamment au sein de la CEMAC), vous disposez des droits suivants :</p>
-    <ul>
-      <li><strong>Accès</strong> : savoir quelles données nous détenons sur vous ;</li>
-      <li><strong>Rectification</strong> : corriger vos informations ;</li>
-      <li><strong>Suppression</strong> : demander l'effacement définitif de votre compte et de vos données ;</li>
-      <li><strong>Opposition</strong> : vous désinscrire à tout moment.</li>
-    </ul>
-    <div class="card">
-      <p><strong>Pour exercer ces droits</strong>, contactez-nous à l'adresse ci-dessous. Les demandes sont traitées sous 30 jours maximum.</p>
-    </div>
+    <h2>4. Durée de conservation</h2>
+    <p>Les données sont conservées tant que votre compte est actif. Vous pouvez demander leur suppression à tout moment (voir ci-dessous). Les données de paiement sont conservées par pawaPay selon ses obligations réglementaires.</p>
 
-    <h2>7. Cookies et stockage local</h2>
-    <p>L'Application utilise le <strong>stockage local de votre navigateur</strong> (localStorage) uniquement pour mémoriser votre session (jeton de connexion) et vos préférences d'affichage. Aucun cookie publicitaire ni dispositif de suivi tiers n'est utilisé.</p>
+    <h2>5. Vos droits</h2>
+    <p>Conformément à la législation applicable en matière de protection des données, vous disposez de droits d'accès, de rectification et de suppression. Écrivez-nous à <a href="mailto:vanemancini83@gmail.com">vanemancini83@gmail.com</a> depuis l'adresse associée à votre compte ; nous répondons sous 30 jours.</p>
 
-    <h2>8. Données de marché</h2>
-    <p>Les cotations affichées (BVMAC, forex, matières premières) sont des données de marché obtenues via <strong>Mansa Markets</strong> et fournies « telles quelles ». Elles sont fournies à titre informatif et ne constituent en aucun cas un conseil en investissement.</p>
+    <h2>6. Sécurité</h2>
+    <p>Connexions chiffrées (HTTPS), mots de passe hachés (bcrypt), sessions par jetons signés (JWT) à durée limitée, et accès à la base de données restreint par clés secrètes.</p>
 
-    <h2>9. Mineurs</h2>
-    <p>L'Application n'est pas destinée aux personnes de moins de 18 ans. Nous ne collectons pas sciemment de données concernant des mineurs ; si vous êtes parent et avez connaissance d'un compte créé par votre enfant, contactez-nous pour sa suppression.</p>
+    <h2>7. Modifications</h2>
+    <p>Toute modification de cette politique sera publiée sur cette page avec sa date de mise à jour. En cas de changement substantiel, vous en serez informé dans l'application.</p>
 
-    <h2>10. Modification de cette politique</h2>
-    <p>Nous pouvons mettre à jour cette politique (notamment lors de l'activation de nouveaux services comme le paiement en ligne). La date de mise à jour figure en tête de page. Les changements substantiels seront annoncés dans l'Application.</p>
+  </main>
+  <footer>
+    <a href="/conditions.html">Conditions d'utilisation</a>
+    <a href="/privacy.html">Confidentialité</a>
+    <a href="/remboursement.html">Remboursement</a>
+    <a href="/contact.html">Contact</a>
+  </footer>
 
-    <h2>11. Contact</h2>
-    <div class="card">
-      <p><strong>Responsable du traitement</strong><br />
-      ViewCEMAC<br />
-      Email : <a href="mailto:vanemancini83@gmail.com">vanemancini83@gmail.com</a><br />
-      Téléphone / WhatsApp : 066 59 83 14</p>
-    </div>
-
-    <a class="back" href="/">← Retour à l'application</a>
-
-    <footer>ViewCEMAC — Zone CEMAC · BVMAC, forex, matières premières</footer>
-  </div>
 </body>
 </html>
