@@ -7,7 +7,8 @@ window.addEventListener("error", function (e) {
   if (!isDev) return;
   const pre = document.createElement("pre");
   pre.style.cssText = "background:#F6465D;color:#fff;padding:12px;white-space:pre-wrap;font-size:14px;z-index:9999;position:relative;";
-  pre.textContent = `ERREUR JS : ${e.message}\n${e.filename}:${e.lineno}`;
+  pre.textContent = `ERREUR JS : ${e.message}
+${e.filename}:${e.lineno}`;
   document.body.insertAdjacentElement("afterbegin", pre);
 });
 
@@ -80,11 +81,26 @@ function formatChange(pct) {
 const RELEVANT_FOREX_PAIRS = ["USD/XAF", "USD/EUR", "USD/GBP", "USD/CNY"];
 const RELEVANT_COMMODITIES = ["BRENT", "COCOA", "COFFEE", "PALM_OIL", "RUBBER", "GOLD"];
 
-function adaptCrypto(raw) {
-  return { ticker: raw.ticker, name: raw.ticker === "BTC" ? "Bitcoin" : raw.ticker === "ETH" ? "Ethereum" : raw.ticker === "BNB" ? "BNB" : "Solana",
+// ✅ Symboles réels des coins (pastilles) + équivalent FCFA sous le prix
+const SYMBOLES_CRYPTO = { BTC: "₿", ETH: "Ξ", BNB: "BNB", SOL: "◎" };
+// Repli si le forex est injoignable (XAF arrimé à l'euro → variations faibles)
+const TAUX_USD_XAF_REPLI = 605;
+
+function adaptCrypto(raw, taux = null) {
+  const t = taux || TAUX_USD_XAF_REPLI;
+  const item = {
+    ticker: raw.ticker,
+    name: raw.ticker === "BTC" ? "Bitcoin" : raw.ticker === "ETH" ? "Ethereum" : raw.ticker === "BNB" ? "BNB" : "Solana",
     price: raw.priceUSD,
     priceDisplay: "$ " + raw.priceUSD.toLocaleString("fr-FR", { maximumFractionDigits: 0 }),
-    change_pct: raw.change_pct ?? null };
+    change_pct: raw.change_pct ?? null,
+    symbol: SYMBOLES_CRYPTO[raw.ticker] || raw.ticker.slice(0, 2).toUpperCase(),
+  };
+  if (raw.priceUSD != null && t) {
+    item.priceFcfa = Math.round(raw.priceUSD * t);
+    item.subPrice = "≈ " + new Intl.NumberFormat("fr-FR").format(item.priceFcfa) + " FCFA";
+  }
+  return item;
 }
 
 const FOREX_NAMES = {
@@ -156,7 +172,17 @@ async function fetchMarket(market, tentative = 0) {
     const total = result.total ?? 0;
     if (market === "crypto") {
       const all = result.data || [];
-      return { success: true, data: all.map(adaptCrypto), isPremium, total };
+      // ✅ Équivalent FCFA : taux USD/XAF récupéré depuis notre propre forex
+      let taux = null;
+      try {
+        const fx = await fetch(`${BACKEND_BASE_URL}/api/marches/forex`);
+        if (fx.ok) {
+          const fxj = await fx.json();
+          const usdxaf = (fxj.data || []).find((p) => p.pair === "USD/XAF");
+          if (usdxaf) taux = usdxaf.rate;
+        }
+      } catch { /* repli 605 utilisé */ }
+      return { success: true, data: all.map((r) => adaptCrypto(r, taux)), isPremium, total };
     }
     if (market === "forex") {
       // ✅ Ordre pertinent : USD/XAF (la paire CEMAC) en premier
@@ -314,7 +340,8 @@ function renderList(items, market, meta = {}) {
   }
 
   items.forEach((item) => {
-    const initials = item.ticker.slice(0, 2).toUpperCase();
+    // ✅ Symbole réel du coin si disponible (crypto), sinon initiales
+    const initials = item.symbol || item.ticker.slice(0, 2).toUpperCase();
     const cls = changeClass(item.change_pct);
     const priceText = item.priceDisplay || formatFCFA(item.price);
 
@@ -354,10 +381,19 @@ function renderList(items, market, meta = {}) {
     const price = document.createElement("span");
     price.className = "m-row__price";
     price.textContent = priceText;
+    right.appendChild(price);
+    // ✅ Équivalent FCFA affiché sous le prix (crypto)
+    if (item.subPrice) {
+      const sub = document.createElement("span");
+      sub.className = "m-row__subprice";
+      sub.style.cssText = "font-size:0.7rem;color:var(--dim);font-family:'IBM Plex Mono',monospace;";
+      sub.textContent = item.subPrice;
+      right.appendChild(sub);
+    }
     const chg = document.createElement("span");
     chg.className = `m-row__chg m-row__chg--${cls}`;
     chg.textContent = formatChange(item.change_pct);
-    right.append(price, chg);
+    right.appendChild(chg);
 
     row.append(left, right);
     list.appendChild(row);
@@ -392,8 +428,13 @@ function renderList(items, market, meta = {}) {
   if (market === "crypto") {
     const disc = document.createElement("div");
     disc.className = "m-note";
-    disc.style.cssText = "margin:-6px 0 0;border-radius:var(--radius);border:1px dashed var(--border)";
-    disc.textContent = "Les cryptomonnaies sont volatiles et ne sont pas régulées en zone CEMAC — informations uniquement, pas un conseil d'investissement.";
+    // ✅ LISIBILITÉ : texte éclairci, plus grand, bordure dorée, léger fond ambré
+    disc.style.cssText =
+      "margin:-6px 0 0;border-radius:var(--radius);" +
+      "border:1px dashed var(--gold);padding:12px 14px;" +
+      "font-size:0.84rem;line-height:1.55;color:#DCE8E1;" +
+      "background:rgba(232,196,104,0.07);";
+    disc.textContent = "⚠️ Les cryptomonnaies sont volatiles et ne sont pas régulées en zone CEMAC. Les cours affichés sont indicatifs — ce n'est pas un conseil en investissement.";
     list.appendChild(disc);
   }
 }
