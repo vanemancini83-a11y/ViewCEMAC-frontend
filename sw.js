@@ -2,7 +2,7 @@
 // ViewCEMAC — Service Worker v5
 // Bump CACHE_NAME à CHAQUE modification (jamais en arrière)
 // ============================================================
-const CACHE_NAME = 'viewcemac-v6'; // ← bump à chaque déploiement majeur
+const CACHE_NAME = 'viewcemac-v7'; // ← bump à chaque déploiement majeur
 const OFFLINE_URL = '/offline.html';
 
 // ------------------------------------------------------------
