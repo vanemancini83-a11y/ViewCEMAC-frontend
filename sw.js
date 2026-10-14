@@ -1,14 +1,9 @@
 // ============================================================
-// frontend-sw.js  →  RENOMME en sw.js et remplace
-//                    ton fichier actuel sur le frontend
+// ViewCEMAC — Service Worker v5
+// Bump CACHE_NAME à CHAQUE modification (jamais en arrière)
 // ============================================================
-// ⚠️ IMPORTANT : le nom du cache est passé à v3. C'est ce qui
-//    force les navigateurs des utilisateurs à télécharger la
-//    nouvelle version du SW. Ne repasse JAMAIS à v2/v1.
-// ============================================================
-
-const CACHE_NAME = 'viewcemac-v4'; // ← bump à chaque déploiement majeur
-const OFFLINE_URL = '/offline.html'; // adapte si ton fallback a un autre chemin
+const CACHE_NAME = 'viewcemac-v6'; // ← bump à chaque déploiement majeur
+const OFFLINE_URL = '/offline.html';
 
 // ------------------------------------------------------------
 // 1. INSTALL — pré-cache le shell + fallback hors-ligne
@@ -19,19 +14,32 @@ self.addEventListener('install', (event) => {
       return cache.addAll([
         '/',
         '/index.html',
-        '/styles.css',   // ← adapte à tes vrais fichiers
-        '/app.js',       // ← adapte à tes vrais fichiers
+        '/styles.css',
+        '/app.js',
+        '/detail.html',
+        '/detail.js',
+        '/auth.html',
+        '/auth.js',
+        '/verification.html',
+        '/verification.js',
+        '/compte.html',
+        '/compte.js',
+        '/icons/viewcemac-icon-192.png',
+        '/icons/viewcemac-icon-512.png',
+        '/conditions.html',
+        '/privacy.html',
+        '/remboursement.html',
+        '/contact.html',
         OFFLINE_URL,
       ]).catch(() => {
-        // Un fichier manquant ne doit pas bloquer l'installation
         console.warn('Pré-cache partiel : certains fichiers introuvables');
       });
-    }).then(() => self.skipWaiting()) // active immédiatement le nouveau SW
+    }).then(() => self.skipWaiting())
   );
 });
 
 // ------------------------------------------------------------
-// 2. ACTIVATE — purge les vieux caches (v1, v2...)
+// 2. ACTIVATE — purge les vieux caches
 // ------------------------------------------------------------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -40,28 +48,23 @@ self.addEventListener('activate', (event) => {
         keys.filter((key) => key !== CACHE_NAME)
             .map((key) => caches.delete(key))
       )
-    ).then(() => self.clients.claim()) // prend le contrôle des onglets ouverts
+    ).then(() => self.clients.claim())
   );
 });
 
 // ------------------------------------------------------------
-// 3. FETCH — stratégie : API = réseau d'abord, assets = cache
+// 3. FETCH — API = réseau d'abord, assets = cache
 // ------------------------------------------------------------
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  // Ne pas intercepter les requêtes non-GET ni cross-origin
-  if (event.request.method !== 'GET' || url.origin !== self.location.origin) {
-    return;
-  }
-
-  // API (ex. /api/* si servie depuis le même domaine) : réseau d'abord,
-  // pas de mise en cache des données utilisateur
+  // API (si servie depuis le même domaine) : réseau d'abord
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request).catch(() =>
         new Response(
-          JSON.stringify({ erreur: 'Réseau indisponible. Serveur en cours de réveil ?' }),
+          JSON.stringify({ erreur: 'Réseau indisponible.' }),
           { status: 503, headers: { 'Content-Type': 'application/json' } }
         )
       )
@@ -69,7 +72,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Assets statiques : cache d'abord, réseau en secours, puis cache dynamique
+  // Assets statiques : cache d'abord, réseau en secours
   event.respondWith(
     caches.match(event.request).then((cached) => {
       return cached || fetch(event.request).then((response) => {
@@ -79,43 +82,33 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       }).catch(() => {
-        // Page de navigation hors-ligne → fallback
-        if (event.request.mode === 'navigate') {
-          return caches.match(OFFLINE_URL);
-        }
+        if (event.request.mode === 'navigate') return caches.match(OFFLINE_URL);
       });
     })
   );
 });
 
 // ------------------------------------------------------------
-// 4. NOTIFICATION CLICK — LE BUG CORRIGÉ (priorité 1 audit)
-//    Avant : e.notification.notification.data.url (double
-//    .notification → TypeError, clic jamais fonctionnel)
+// 4. NOTIFICATION CLICK — ouvre l'app (onglet existant ou nouveau)
 // ------------------------------------------------------------
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
-  // ✅ Correction : un seul .notification + fallback si data manquant
   const url = event.notification.data?.url || 'https://viewcemac.vercel.app';
-
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // Réutilise un onglet déjà ouvert sur l'app
       for (const client of windowClients) {
         if (client.url.startsWith('https://viewcemac.vercel.app')) {
           return client.navigate(url).then((c) => c?.focus());
         }
       }
-      // Sinon ouvre un nouvel onglet
       return clients.openWindow(url);
     })
   );
 });
 
 // ------------------------------------------------------------
-// 5. PUSH (si tu gères les push notifications)
-//    data.url vient du payload envoyé par ton serveur
+// 5. PUSH — ✅ icônes corrigées (les anciens chemins n'existaient pas :
+//    /icons/icon-192.png et /icons/badge-72.png → icône vide dans la notif)
 // ------------------------------------------------------------
 self.addEventListener('push', (event) => {
   let data = {};
@@ -128,8 +121,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'ViewCEMAC', {
       body: data.body || 'Nouvelle mise à jour disponible.',
-      icon: '/icons/icon-192.png', // ← adapte à ton chemin réel
-      badge: '/icons/badge-72.png',
+      icon: '/icons/viewcemac-icon-192.png',
+      badge: '/icons/viewcemac-icon-192.png',
       data: { url: data.url || 'https://viewcemac.vercel.app' },
       tag: data.tag || 'viewcemac-general',
       renotify: false,
