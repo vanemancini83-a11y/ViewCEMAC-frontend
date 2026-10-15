@@ -418,7 +418,7 @@ function renderList(items, market, meta = {}) {
     count.textContent = `+${lockedCount} ${label}${plural} de plus`;
     const action = document.createElement("span");
     action.className = "locked-cta-action";
-    action.textContent = "Débloquer — dès 300 FCFA →";
+    action.textContent = "Débloquer tout l'accès →";
     cta.append(count, action);
 
     cta.addEventListener("click", () => document.querySelector(".premium-cta")?.click());
@@ -599,7 +599,7 @@ function refreshPremiumCta(isPremium) {
     if (title) title.textContent = "Passe en Premium";
     if (price) price.style.display = "";
     if (copy) copy.textContent = COPY_PREMIUM;
-    btn.textContent = "Passer Premium — dès 300 FCFA";
+    btn.textContent = "Passer Premium";
     btn.disabled = false;
   }
 }
@@ -628,7 +628,9 @@ async function loadProfile() {
   } catch { /* silencieux */ }
 }
 
-const PAIEMENT_MANUEL_NUMERO = "066 59 83 14 (Moov Money) ou 074 52 28 22 (Airtel Money)";
+// ✅ Airtel en premier ; Moov indiqué indisponible
+const PAIEMENT_MANUEL_NUMERO = "074 52 28 22 (Airtel Money)";
+const PAIEMENT_MANUEL_MOOV = "Moov Money indisponible pour le moment";
 
 // Fallback si le catalogue ne charge pas (les vrais prix viennent du backend)
 const PASSES_FALLBACK = [
@@ -671,7 +673,7 @@ async function ouvrirModalPasses() {
   titre.textContent = "Choisis ton pass Premium";
   const sousTitre = document.createElement("p");
   sousTitre.style.cssText = "font-size:13px;opacity:0.75;margin:0 0 16px;";
-  sousTitre.textContent = "Paiement Airtel Money / Moov Money — activation immédiate.";
+  sousTitre.textContent = "Paiement Airtel Money — activation immédiate (Moov bientôt disponible).";
   card.append(titre, sousTitre);
   const inputTel = document.createElement("input");
   inputTel.type = "tel";
@@ -779,7 +781,8 @@ async function ouvrirModalPasses() {
           "Paiement en ligne momentanément indisponible.\n\n" +
           "Pour t'abonner maintenant :\n" +
           "1. Envoie le montant au : " + PAIEMENT_MANUEL_NUMERO + "\n" +
-          "2. Envoie ton numéro ViewCEMAC par SMS ou WhatsApp au même numéro\n" +
+          "   ⚠️ " + PAIEMENT_MANUEL_MOOV + "\n" +
+          "2. Envoie ton numéro ViewCEMAC par SMS ou WhatsApp au 074 52 28 22\n" +
           "3. Activation sous quelques minutes"
         );
       }
