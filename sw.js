@@ -2,7 +2,7 @@
 // ViewCEMAC — Service Worker v5
 // Bump CACHE_NAME à CHAQUE modification (jamais en arrière)
 // ============================================================
-const CACHE_NAME = 'viewcemac-v9'; // ← bump à chaque déploiement majeur
+const CACHE_NAME = 'viewcemac-v10'; // ← bump à chaque déploiement majeur
 const OFFLINE_URL = '/offline.html';
 
 // ------------------------------------------------------------
@@ -30,6 +30,8 @@ self.addEventListener('install', (event) => {
         '/privacy.html',
         '/remboursement.html',
         '/contact.html',
+        '/test-pawapay.html',
+        '/test-pawapay.js',
         OFFLINE_URL,
       ]).catch(() => {
         console.warn('Pré-cache partiel : certains fichiers introuvables');
