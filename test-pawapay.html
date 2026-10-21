@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0C1A15" />
+  <title>Test token pawaPay — ViewCEMAC</title>
+  <!-- ⚠️ PAGE TEMPORAIRE DE DIAGNOSTIC — À SUPPRIMER APRÈS RÉSOLUTION -->
+  <style>
+    :root { --bg:#0C1A15; --panel:#122720; --border:#1E3A30; --gold:#E8C468; --text:#E9F2ED; --dim:#8FA69B; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans',system-ui,sans-serif; min-height:100vh; }
+    header { display:flex; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--border); }
+    .back { background:#16352B; border:1px solid var(--border); color:var(--gold); font-size:.85rem; font-weight:600; padding:8px 16px; border-radius:999px; text-decoration:none; }
+    .brand { font-family:Georgia,serif; font-weight:700; }
+    main { max-width:640px; margin:0 auto; padding:24px 18px 40px; }
+    h1 { font-size:1.2rem; color:var(--gold); margin-bottom:8px; }
+    p { font-size:.88rem; color:var(--dim); line-height:1.6; margin-bottom:14px; }
+    textarea { width:100%; min-height:110px; background:var(--panel); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:12px; font-family:monospace; font-size:.8rem; resize:vertical; }
+    button { width:100%; margin-top:12px; border:none; cursor:pointer; background:#F0B90B; color:#0C1A15; font-weight:700; font-size:.95rem; padding:14px; border-radius:12px; }
+    button:disabled { opacity:.6; }
+    pre { margin-top:16px; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; font-size:.78rem; white-space:pre-wrap; word-break:break-all; color:var(--text); min-height:60px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="/">← Retour</a>
+    <span class="brand">Test token pawaPay</span>
+  </header>
+  <main>
+    <h1>🔬 Validation directe du token (sandbox)</h1>
+    <p>Colle ci-dessous un <strong>token frais</strong> généré sur <strong>dashboard.sandbox.pawapay.io</strong> (Developers → Create API Token, copié immédiatement). Il est envoyé directement à l'endpoint <code>/v2/active-conf</code> — exactement le test demandé par le support. Le token n'est enregistré nulle part.</p>
+    <textarea id="token" placeholder="Colle le token eyJ... ici" autocomplete="off"></textarea>
+    <button id="go" type="button">Tester le token</button>
+    <pre id="out">Le résultat s'affichera ici (attends jusqu'à 20 s).</pre>
+  </main>
+  <script src="test-pawapay.js"></script>
+</body>
+</html>
